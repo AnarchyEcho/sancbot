@@ -1,27 +1,21 @@
 ﻿#Manually added files
 
-nadekobot/src/NadekoBot/data/last_known_version.txt
-nadekobot/scripts/
+src/NadekoBot/data/last_known_version.txt
+scripts/
 **/DESIGN.md
-nadekobot/src/NadekoBot/data
-data
-medusae
-*.db
-*.db-shm
-*.db-wal
+src/NadekoBot/data
 
 # medusa stuff
 src/NadekoBot/data/medusae/
-data
 
 # other
 
 output/
-nadekobot/src/NadekoBot/output
-nadekobot/src/NadekoBot/creds.yml
-nadekobot/src/NadekoBot/data/creds.yml
-nadekobot/src/NadekoBot/Command Errors*.txt
-nadekobot/src/NadekoBot/data/NadekoBot.db*
+src/NadekoBot/output
+src/NadekoBot/creds.yml
+src/NadekoBot/data/creds.yml
+src/NadekoBot/Command Errors*.txt
+src/NadekoBot/data/NadekoBot.db*
 
 # Created by https://www.gitignore.io/api/visualstudio,visualstudiocode,windows,linux,macos
 
