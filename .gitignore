@@ -4,15 +4,14 @@ nadekobot/src/NadekoBot/data/last_known_version.txt
 nadekobot/scripts/
 **/DESIGN.md
 nadekobot/src/NadekoBot/data
-data
 medusae
 *.db
 *.db-shm
 *.db-wal
+.env*
 
 # medusa stuff
 src/NadekoBot/data/medusae/
-data
 
 # other
 
