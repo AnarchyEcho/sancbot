@@ -4,7 +4,6 @@ nadekobot/src/NadekoBot/data/last_known_version.txt
 nadekobot/scripts/
 **/DESIGN.md
 nadekobot/src/NadekoBot/data
-medusae
 *.db
 *.db-shm
 *.db-wal
