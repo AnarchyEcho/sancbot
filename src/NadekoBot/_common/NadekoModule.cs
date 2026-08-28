@@ -81,12 +81,7 @@ public abstract class NadekoModule : ModuleBase
     }
 
     // TypeConverter typeConverter = TypeDescriptor.GetConverter(propType); ?
-    public async Task<string> GetUserInputAsync(
-        ulong userId,
-        ulong channelId,
-        Func<string, bool> validate = null,
-        int timeoutMs = 10000,
-        CancellationToken cancel = default)
+    public async Task<string> GetUserInputAsync(ulong userId, ulong channelId, Func<string, bool> validate = null)
     {
         var userInputTask = new TaskCompletionSource<string>();
         var dsc = (DiscordSocketClient)ctx.Client;
@@ -94,8 +89,7 @@ public abstract class NadekoModule : ModuleBase
         {
             dsc.MessageReceived += MessageReceived;
 
-            // A cancelled delay completes as cancelled, so WhenAny returns it and the wait ends.
-            if (await Task.WhenAny(userInputTask.Task, Task.Delay(timeoutMs, cancel)) != userInputTask.Task)
+            if (await Task.WhenAny(userInputTask.Task, Task.Delay(10000)) != userInputTask.Task)
                 return null;
 
             return await userInputTask.Task;

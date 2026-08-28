@@ -4,7 +4,11 @@ using NadekoBot.AiAgent;
 
 namespace NadekoBot.Modules.Utility.AiAgent.Adapters;
 
-// Discovery and dispatch for the command index and the data tool index.
+/// <summary>
+/// Discovery / dispatch tools for searchable command and data-tool indexes.
+/// search_commands and run_command go through CommandSearchService.
+/// search_data_tools/describe_data_tool/invoke_data_tool go through DataToolSearchService and the registry.
+/// </summary>
 public sealed class DiscoveryAiAdapter(
     CommandSearchService commandSearch,
     DataToolSearchService dataToolSearch,
@@ -152,7 +156,9 @@ public sealed class DiscoveryAiAdapter(
         catch (Exception ex)
         {
             Log.Warning(ex, "Error invoking data tool {ToolName}", name);
-            // Same shape as a generated wrapper, so the LLM sees one error contract.
+            // Generated tool wrappers return JSON; we mirror that shape here so the
+            // LLM sees a single error contract for everything routed through
+            // invoke_data_tool, including unexpected adapter failures.
             throw ToolException.Internal(ex.Message);
         }
     }

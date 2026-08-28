@@ -18,7 +18,7 @@ public sealed class QuestService(
         new PlantPickQuest(),
         new BetQuest(),
         new BetFlowersQuest(),
-        new GiftWaifuQuest(),
+        // new GiftWaifuQuest(),
         new CatchFishQuest(),
         new SetPixelsQuest(),
         new JoinAnimalRaceQuest(),
@@ -29,17 +29,16 @@ public sealed class QuestService(
 
     private const int MAX_QUESTS_PER_DAY = 3;
 
-    private TypedKey<bool> UserHasQuestsKey(ulong userId)
-        => new($"daily:generated:{userId}");
+    private TypedKey<bool> UserHasQuestsKey(ulong userId) => new($"daily:generated:{userId}");
 
-    private TypedKey<bool> UserCompletedDailiesKey(ulong userId)
-        => new($"daily:completed:{userId}");
-
+    private TypedKey<bool> UserCompletedDailiesKey(ulong userId) =>
+        new($"daily:completed:{userId}");
 
     public Task ReportActionAsync(
         ulong userId,
         QuestEventType eventType,
-        Dictionary<string, string>? metadata = null)
+        Dictionary<string, string>? metadata = null
+    )
     {
         // don't block any caller
 
@@ -74,7 +73,11 @@ public sealed class QuestService(
 
                 await using var uow = db.GetDbContext();
                 await uow.GetTable<UserQuest>()
-                    .Where(x => x.UserId == userId && x.QuestId == q.QuestId && x.QuestNumber == uq.QuestNumber)
+                    .Where(x =>
+                        x.UserId == userId
+                        && x.QuestId == q.QuestId
+                        && x.QuestNumber == uq.QuestNumber
+                    )
                     .Set(x => x.Progress, newProgress)
                     .Set(x => x.IsCompleted, isCompleted)
                     .UpdateAsync();
@@ -84,19 +87,19 @@ public sealed class QuestService(
                 if (userQuests.All(x => x.UserQuest.IsCompleted))
                 {
                     var timeUntilTomorrow = now.Date.AddDays(1) - DateTime.UtcNow;
-                    if (!await botCache.AddAsync(
+                    if (
+                        !await botCache.AddAsync(
                             UserCompletedDailiesKey(userId),
                             true,
-                            expiry: timeUntilTomorrow))
+                            expiry: timeUntilTomorrow
+                        )
+                    )
                         return;
 
                     try
                     {
                         var user = await client.GetUserAsync(userId);
-                        await sender
-                            .Response(user)
-                            .Confirm(strs.dailies_done)
-                            .SendAsync();
+                        await sender.Response(user).Confirm(strs.dailies_done).SendAsync();
                     }
                     catch
                     {
@@ -113,7 +116,8 @@ public sealed class QuestService(
 
     public async Task<IReadOnlyList<(IQuest? Quest, UserQuest UserQuest)>> GetUserQuestsAsync(
         ulong userId,
-        DateTime now)
+        DateTime now
+    )
     {
         var today = now.Date;
         await EnsureUserDailiesAsync(userId, today);
@@ -133,7 +137,14 @@ public sealed class QuestService(
     {
         var today = date.Date;
         var timeUntilTomorrow = today.AddDays(1) - DateTime.UtcNow;
-        if (!await botCache.AddAsync(UserHasQuestsKey(userId), true, expiry: timeUntilTomorrow, overwrite: false))
+        if (
+            !await botCache.AddAsync(
+                UserHasQuestsKey(userId),
+                true,
+                expiry: timeUntilTomorrow,
+                overwrite: false
+            )
+        )
             return;
 
         await using var uow = db.GetDbContext();
@@ -141,51 +152,50 @@ public sealed class QuestService(
         for (var i = 0; i < MAX_QUESTS_PER_DAY; i++)
         {
             await uow.GetTable<UserQuest>()
-                .InsertOrUpdateAsync(() => new()
-                    {
-                        UserId = userId,
-                        QuestNumber = i,
-                        DateAssigned = today,
+                .InsertOrUpdateAsync(
+                    () =>
+                        new()
+                        {
+                            UserId = userId,
+                            QuestNumber = i,
+                            DateAssigned = today,
 
-                        IsCompleted = false,
-                        QuestId = newQuests[i].QuestId,
-                        Progress = 0,
-                    },
-                    old => new()
-                    {
-                    },
-                    () => new()
-                    {
-                        UserId = userId,
-                        QuestNumber = i,
-                        DateAssigned = today
-                    });
+                            IsCompleted = false,
+                            QuestId = newQuests[i].QuestId,
+                            Progress = 0,
+                        },
+                    old => new() { },
+                    () =>
+                        new()
+                        {
+                            UserId = userId,
+                            QuestNumber = i,
+                            DateAssigned = today,
+                        }
+                );
         }
     }
 
     private IReadOnlyList<IQuest> GenerateDailyQuestsAsync()
     {
-        return _availableQuests
-            .ToList()
-            .Shuffle()
-            .Take(MAX_QUESTS_PER_DAY)
-            .ToList();
+        return _availableQuests.ToList().Shuffle().Take(MAX_QUESTS_PER_DAY).ToList();
     }
 
-    public int Priority
-        => int.MinValue;
+    public int Priority => int.MinValue;
 
-    public async ValueTask<bool> ExecPreCommandAsync(ICommandContext context, string moduleName, CommandInfo command)
+    public async ValueTask<bool> ExecPreCommandAsync(
+        ICommandContext context,
+        string moduleName,
+        CommandInfo command
+    )
     {
         var cmdName = command.PermKey();
 
         await ReportActionAsync(
             context.User.Id,
             QuestEventType.CommandUsed,
-            new()
-            {
-                { "name", cmdName }
-            });
+            new() { { "name", cmdName } }
+        );
 
         return false;
     }

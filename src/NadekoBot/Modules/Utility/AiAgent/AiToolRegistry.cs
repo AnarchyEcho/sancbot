@@ -3,13 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace NadekoBot.Modules.Utility.AiAgent;
 
-// Discovers the tools through DI and caches their schemas.
+/// <summary>
+/// Registry implementation that discovers all IAiTool implementations via DI
+/// and caches their OpenAI-compatible schemas
+/// </summary>
 public sealed class AiToolRegistry : IAiToolRegistry, INService
 {
     private readonly Dictionary<string, IAiTool> _tools;
     private readonly Dictionary<string, IAiTool> _dataTools;
-    private readonly IAiTool[] _allTools;
     private readonly List<JsonElement> _coreSchemas;
+    private readonly List<JsonElement> _allSchemas;
 
     private static readonly JsonSerializerOptions _jsonOpts = new()
     {
@@ -21,18 +24,21 @@ public sealed class AiToolRegistry : IAiToolRegistry, INService
     {
         _tools = tools.ToDictionary(t => t.Name);
         _dataTools = _tools.Where(kv => kv.Value.IsDataTool).ToDictionary(kv => kv.Key, kv => kv.Value);
-        _allTools = _tools.Values.ToArray();
         _coreSchemas = _tools.Values.Where(t => !t.IsDataTool).Select(BuildSchema).ToList();
+        _allSchemas = _tools.Values.Select(BuildSchema).ToList();
     }
 
     public IReadOnlyList<IAiTool> GetAllTools()
-        => _allTools;
+        => _tools.Values.ToList();
 
     public IAiTool? GetTool(string name)
         => _tools.GetValueOrDefault(name);
 
     public IReadOnlyList<JsonElement> GetToolSchemas()
         => _coreSchemas;
+
+    public IReadOnlyList<JsonElement> GetAllToolSchemas()
+        => _allSchemas;
 
     public IReadOnlyList<JsonElement> GetToolSchemas(IReadOnlySet<string> allowedTools)
         => _tools.Where(kv => allowedTools.Contains(kv.Key))

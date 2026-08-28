@@ -2,23 +2,17 @@
 
 public sealed class WellInformedQuest : IQuest
 {
-    public QuestIds QuestId
-        => QuestIds.WellInformed;
+    public QuestIds QuestId => QuestIds.WellInformed;
 
-    public string Name
-        => "Well Informed";
+    public string Name => "Well Informed";
 
-    public string Desc
-        => "Check your flower stats";
+    public string Desc => "Check your cookies stats";
 
-    public string ProgDesc
-        => "";
+    public string ProgDesc => "";
 
-    public QuestEventType EventType
-        => QuestEventType.CommandUsed;
+    public QuestEventType EventType => QuestEventType.CommandUsed;
 
-    public long RequiredAmount
-        => 0b111;
+    public long RequiredAmount => 0b111;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {

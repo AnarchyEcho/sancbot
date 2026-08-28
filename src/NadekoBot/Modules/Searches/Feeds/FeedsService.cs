@@ -1,12 +1,13 @@
 ﻿#nullable disable
+using System.Buffers;
+using System.Text.RegularExpressions;
+using System.Web;
 using CodeHollow.FeedReader;
 using CodeHollow.FeedReader.Feeds;
 using LinqToDB;
 using LinqToDB.EntityFrameworkCore;
 using NadekoBot.Common.ModuleBehaviors;
 using NadekoBot.Db.Models;
-using System.Buffers;
-using System.Text.RegularExpressions;
 
 namespace NadekoBot.Modules.Searches.Services;
 
@@ -34,7 +35,8 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         IMessageSenderService sender,
         ShardData shardData,
         SearchesConfigService scs,
-        IHttpClientFactory httpFactory)
+        IHttpClientFactory httpFactory
+    )
     {
         _db = db;
         _client = client;
@@ -50,10 +52,15 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         {
             var subs = await uow.Set<FeedSub>()
                 .AsQueryable()
-                .Where(Queries.GuildOnShard<FeedSub>(x => x.GuildId, _shardData.TotalShards, _shardData.ShardId))
+                .Where(
+                    Queries.GuildOnShard<FeedSub>(
+                        x => x.GuildId,
+                        _shardData.TotalShards,
+                        _shardData.ShardId
+                    )
+                )
                 .ToListAsyncLinqToDB();
-            _subs = subs
-                .GroupBy(x => x.Url.ToLower())
+            _subs = subs.GroupBy(x => x.Url.ToLower())
                 .ToDictionary(x => x.Key, x => x.ToList())
                 .ToConcurrent();
         }
@@ -61,8 +68,7 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         await TrackFeeds();
     }
 
-    private void ClearErrors(string url)
-        => _errorCounters.Remove(url);
+    private void ClearErrors(string url) => _errorCounters.Remove(url);
 
     private async Task<uint> AddError(string url, List<FeedSub> subs)
     {
@@ -72,16 +78,18 @@ public sealed partial class FeedsService : INService, IReadyExecutor
 
             if (newValue >= MAX_FEED_ERRORS)
             {
-                Log.Debug("Feed {FeedUrl} reached {MaxErrors} errors, removing {SubCount} subscription(s)",
+                Log.Debug(
+                    "Feed {FeedUrl} reached {MaxErrors} errors, removing {SubCount} subscription(s)",
                     url,
                     MAX_FEED_ERRORS,
-                    subs.Count);
+                    subs.Count
+                );
 
-                await using var ctx = _db.GetDbContext();
-                await ctx.GetTable<FeedSub>()
-                    .DeleteAsync(x => subs.Select(s => s.Id).Contains(x.Id));
-
-                _subs.TryRemove(url, out _);
+                // await using var ctx = _db.GetDbContext();
+                // await ctx.GetTable<FeedSub>()
+                //     .DeleteAsync(x => subs.Select(s => s.Id).Contains(x.Id));
+                //
+                // _subs.TryRemove(url, out _);
                 ClearErrors(url);
 
                 foreach (var sub in subs)
@@ -96,9 +104,7 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                         if (ch is null)
                             continue;
 
-                        await _sender.Response(ch)
-                            .Error(strs.feed_auto_removed(url))
-                            .SendAsync();
+                        // await _sender.Response(ch).Error(strs.feed_auto_removed(url)).SendAsync();
                     }
                     catch { }
                 }
@@ -127,8 +133,7 @@ public sealed partial class FeedsService : INService, IReadyExecutor
     /// </summary>
     public static EmbedBuilder BuildFeedEmbed(EmbedBuilder embed, FeedItem feedItem, string rssUrl)
     {
-        embed.WithFooter(rssUrl);
-
+        bool galleryImages = false;
         var link = feedItem.SpecificItem.Link;
         if (!string.IsNullOrWhiteSpace(link) && Uri.IsWellFormedUriString(link, UriKind.Absolute))
             embed.WithUrl(link);
@@ -136,12 +141,17 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         var title = string.IsNullOrWhiteSpace(feedItem.Title) ? "-" : feedItem.Title;
 
         var gotImage = false;
-        if (feedItem.SpecificItem is MediaRssFeedItem mrfi
-            && (mrfi.Enclosure?.MediaType?.StartsWith("image/") ?? false))
+        galleryImages = false;
+        if (
+            feedItem.SpecificItem is MediaRssFeedItem mrfi
+            && (mrfi.Enclosure?.MediaType?.StartsWith("image/") ?? false)
+        )
         {
             var imgUrl = mrfi.Enclosure.Url;
-            if (!string.IsNullOrWhiteSpace(imgUrl)
-                && Uri.IsWellFormedUriString(imgUrl, UriKind.Absolute))
+            if (
+                !string.IsNullOrWhiteSpace(imgUrl)
+                && Uri.IsWellFormedUriString(imgUrl, UriKind.Absolute)
+            )
             {
                 embed.WithImageUrl(imgUrl);
                 gotImage = true;
@@ -150,23 +160,107 @@ public sealed partial class FeedsService : INService, IReadyExecutor
 
         if (!gotImage && feedItem.SpecificItem is AtomFeedItem afi)
         {
-            var previewElement = afi.Element.Descendants()
+            var previewElement = afi
+                .Element.Descendants()
                 .FirstOrDefault(x => x.Name.LocalName == "preview");
 
             if (previewElement is null)
             {
-                previewElement = afi.Element.Descendants()
+                previewElement = afi
+                    .Element.Descendants()
                     .FirstOrDefault(x => x.Name.LocalName == "thumbnail");
             }
 
-            if (previewElement is not null)
+            if (previewElement != null && previewElement.ToString().Contains("thumbs"))
+            {
+                galleryImages = true;
+                Console.WriteLine("custom reddit shit happens");
+                string galleryLink =
+                    $"https://www.reddit.com/gallery/{Regex.Match(link, @"(?<=comments/)\w+").Value}";
+                using HttpClient client = new();
+                client.DefaultRequestHeaders.Add("User-Agent", "C# Discord Bot");
+                using HttpResponseMessage response = client.GetAsync(galleryLink).Result;
+                using HttpContent content = response.Content;
+                string result = content.ReadAsStringAsync().Result;
+                MatchCollection galleryRegexTest = Regex.Matches(
+                    result,
+                    @"(?<=a href=.)[A-z0-9:/.?=&;]+(?<!\W)"
+                );
+                int i = 1;
+                foreach (Match x in galleryRegexTest)
+                {
+                    string newTitle = $"{title} {i}/{galleryRegexTest.Count}";
+                    embed.WithTitle(newTitle.TrimTo(256));
+                    if (!x.Value.Contains("external"))
+                    {
+                        embed.WithImageUrl(x.Value.Replace("preview", "i"));
+                    }
+                    else
+                    {
+                        embed.WithImageUrl(x.Value);
+                    }
+
+                    string description = feedItem.Description.StripHtml();
+                    if (!string.IsNullOrWhiteSpace(feedItem.Description))
+                        embed.WithDescription(description.TrimTo(2048));
+                    i++;
+                }
+            }
+            if (previewElement != null && !galleryImages)
             {
                 var urlAttribute = previewElement.Attribute("url");
-                if (urlAttribute is not null
+                if (
+                    urlAttribute != null
                     && !string.IsNullOrWhiteSpace(urlAttribute.Value)
-                    && Uri.IsWellFormedUriString(urlAttribute.Value, UriKind.Absolute))
+                    && Uri.IsWellFormedUriString(urlAttribute.Value, UriKind.Absolute)
+                )
                 {
-                    embed.WithImageUrl(urlAttribute.Value);
+                    string parsedUrl = urlAttribute.Value;
+                    if (!parsedUrl.Contains("external"))
+                    {
+                        parsedUrl = parsedUrl.Replace("preview", "i");
+                    }
+                    embed.WithImageUrl(parsedUrl);
+                    gotImage = true;
+                }
+            }
+            if (!gotImage && !galleryImages)
+            {
+                string rawContent = null;
+                if (afi != null)
+                {
+                    var contentElement = afi
+                        .Element.Elements()
+                        .FirstOrDefault(x => x.Name.LocalName == "content");
+                    if (contentElement != null)
+                        rawContent = HttpUtility.HtmlDecode(contentElement.Value);
+                }
+                if (string.IsNullOrWhiteSpace(rawContent))
+                    rawContent = feedItem.Description;
+
+                if (!string.IsNullOrWhiteSpace(rawContent))
+                {
+                    var hrefMatch = Regex.Match(
+                        rawContent,
+                        @"href=""([^""]+\.(?:png|jpg|jpeg|gif))"""
+                    );
+                    if (hrefMatch.Success)
+                    {
+                        var matchedUrl = HttpUtility.HtmlDecode(hrefMatch.Groups[1].Value);
+                        if (Uri.IsWellFormedUriString(matchedUrl, UriKind.Absolute))
+                        {
+                            if (
+                                !matchedUrl.Contains("external")
+                                && matchedUrl.Contains("preview.redd.it")
+                            )
+                            {
+                                matchedUrl = matchedUrl.Replace("preview.redd.it", "i.redd.it");
+                            }
+
+                            embed.WithImageUrl(matchedUrl);
+                            gotImage = true;
+                        }
+                    }
                 }
             }
         }
@@ -176,7 +270,6 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         var desc = feedItem.Description?.StripHtml();
         if (!string.IsNullOrWhiteSpace(feedItem.Description))
             embed.WithDescription(desc.TrimTo(2048));
-
         return embed;
     }
 
@@ -194,7 +287,10 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                 try
                 {
                     var feedTask = FeedReader.ReadAsync(rssUrl, userAgent: USER_AGENT);
-                    var completed = await Task.WhenAny(feedTask, Task.Delay(TimeSpan.FromSeconds(15)));
+                    var completed = await Task.WhenAny(
+                        feedTask,
+                        Task.Delay(TimeSpan.FromSeconds(15))
+                    );
                     if (completed != feedTask)
                     {
                         Log.Debug("Feed {FeedUrl} timed out after 15 seconds", rssUrl);
@@ -214,8 +310,8 @@ public sealed partial class FeedsService : INService, IReadyExecutor
 
                         items.Add((item, pubDate.Value.ToUniversalTime()));
 
-                        // show at most 3 items if you're behind
-                        if (items.Count > 2)
+                        // show at most X-1 items if you're behind
+                        if (items.Count > 5)
                             break;
                     }
 
@@ -256,21 +352,27 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                                 if (ch is null)
                                     continue;
 
-                                var sendTask = _sender.Response(ch)
-                                    .Embed(embed)
-                                    .Text(string.IsNullOrWhiteSpace(val.Message)
-                                        ? string.Empty
-                                        : val.Message)
+                                embed.WithColor(new Color(59, 59, 65));
+                                var sendTask = _sender
+                                    .Response(ch)
+                                    .Embed(embed, new Color(59, 59, 65))
+                                    .Text(
+                                        string.IsNullOrWhiteSpace(val.Message)
+                                            ? string.Empty
+                                            : val.Message
+                                    )
                                     .Sanitize(false)
                                     .SendAsync();
                                 tasks.Add(sendTask);
                             }
                             catch (Exception ex)
                             {
-                                Log.Debug(ex,
+                                Log.Debug(
+                                    ex,
                                     "Error sending feed update to {GuildId}/{ChannelId}",
                                     val.GuildId,
-                                    val.ChannelId);
+                                    val.ChannelId
+                                );
                             }
                         }
 
@@ -283,16 +385,19 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                             "Removing {Count} feed subscription(s) for {FeedUrl} - bot is no longer in those guilds: {GuildIds}",
                             deadSubs.Count,
                             rssUrl,
-                            string.Join(", ", deadSubs.Select(s => s.GuildId)));
+                            string.Join(", ", deadSubs.Select(s => s.GuildId))
+                        );
 
                         await using var ctx = _db.GetDbContext();
                         await ctx.GetTable<FeedSub>()
                             .DeleteAsync(x => deadSubs.Select(s => s.Id).Contains(x.Id));
 
                         var deadIds = deadSubs.Select(s => s.Id).ToHashSet();
-                        _subs.AddOrUpdate(kvp.Key,
+                        _subs.AddOrUpdate(
+                            kvp.Key,
                             [],
-                            (_, old) => old.Where(x => !deadIds.Contains(x.Id)).ToList());
+                            (_, old) => old.Where(x => !deadIds.Contains(x.Id)).ToList()
+                        );
                     }
 
                     ClearErrors(rssUrl);
@@ -301,12 +406,14 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                 {
                     var errorCount = await AddError(rssUrl, kvp.Value);
 
-                    Log.Debug("An error occured while getting rss stream ({ErrorCount} / {MaxErrors}) {RssFeed}"
-                                + "\n {Message}",
+                    Log.Debug(
+                        "An error occured while getting rss stream ({ErrorCount} / {MaxErrors}) {RssFeed}"
+                            + "\n {Message}",
                         errorCount,
                         MAX_FEED_ERRORS,
                         rssUrl,
-                        $"[{ex.GetType().Name}]: {ex.Message}");
+                        $"[{ex.GetType().Name}]: {ex.Message}"
+                    );
                 }
             }
 
@@ -318,17 +425,15 @@ public sealed partial class FeedsService : INService, IReadyExecutor
     {
         using var uow = _db.GetDbContext();
 
-        return uow.GetTable<FeedSub>()
-            .Where(x => x.GuildId == guildId)
-            .OrderBy(x => x.Id)
-            .ToList();
+        return uow.GetTable<FeedSub>().Where(x => x.GuildId == guildId).OrderBy(x => x.Id).ToList();
     }
 
     public async Task<FeedAddResult> AddFeedAsync(
         ulong guildId,
         ulong channelId,
         string rssFeed,
-        string message)
+        string message
+    )
     {
         ArgumentNullException.ThrowIfNull(rssFeed, nameof(rssFeed));
 
@@ -338,8 +443,10 @@ public sealed partial class FeedsService : INService, IReadyExecutor
             return FeedAddResult.Invalid;
 
         await using var uow = _db.GetDbContext();
-        if (await uow.GetTable<FeedSub>().AnyAsyncLinqToDB(x => x.GuildId == guildId &&
-                                                                x.Url.ToLower() == feedUrl.ToLower()))
+        if (
+            await uow.GetTable<FeedSub>()
+                .AnyAsyncLinqToDB(x => x.GuildId == guildId && x.Url.ToLower() == feedUrl.ToLower())
+        )
             return FeedAddResult.Duplicate;
 
         var count = await uow.GetTable<FeedSub>().CountAsyncLinqToDB(x => x.GuildId == guildId);
@@ -347,17 +454,17 @@ public sealed partial class FeedsService : INService, IReadyExecutor
             return FeedAddResult.LimitReached;
 
         var fs = await uow.GetTable<FeedSub>()
-            .InsertWithOutputAsync(() => new FeedSub
-            {
-                GuildId = guildId,
-                ChannelId = channelId,
-                Url = feedUrl,
-                Message = message
-            });
+            .InsertWithOutputAsync(() =>
+                new FeedSub
+                {
+                    GuildId = guildId,
+                    ChannelId = channelId,
+                    Url = feedUrl,
+                    Message = message,
+                }
+            );
 
-        _subs.AddOrUpdate(fs.Url.ToLower(),
-            [fs],
-            (_, old) => old.Append(fs).ToList());
+        _subs.AddOrUpdate(fs.Url.ToLower(), [fs], (_, old) => old.Append(fs).ToList());
 
         return FeedAddResult.Success;
     }
@@ -368,18 +475,20 @@ public sealed partial class FeedsService : INService, IReadyExecutor
             return false;
 
         using var uow = _db.GetDbContext();
-        var items = uow.Set<FeedSub>()
-            .Where(x => x.GuildId == guildId)
-            .OrderBy(x => x.Id)
-            .ToList();
+        var items = uow.Set<FeedSub>().Where(x => x.GuildId == guildId).OrderBy(x => x.Id).ToList();
 
         if (items.Count <= index)
             return false;
 
         var toRemove = items[index];
-        _subs.AddOrUpdate(toRemove.Url.ToLower(),
+        _subs.AddOrUpdate(
+            toRemove.Url.ToLower(),
             [],
-            (_, old) => { return old.Where(x => x.Id != toRemove.Id).ToList(); });
+            (_, old) =>
+            {
+                return old.Where(x => x.Id != toRemove.Id).ToList();
+            }
+        );
         uow.Remove(toRemove);
         uow.SaveChanges();
 
@@ -419,11 +528,14 @@ public sealed partial class FeedsService : INService, IReadyExecutor
             http.Timeout = TimeSpan.FromSeconds(YT_RESOLVE_TIMEOUT_SECONDS);
             http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", USER_AGENT);
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(YT_RESOLVE_TIMEOUT_SECONDS));
+            using var cts = new CancellationTokenSource(
+                TimeSpan.FromSeconds(YT_RESOLVE_TIMEOUT_SECONDS)
+            );
             using var response = await http.GetAsync(
                 pageUrl,
                 HttpCompletionOption.ResponseHeadersRead,
-                cts.Token);
+                cts.Token
+            );
             response.EnsureSuccessStatusCode();
 
             await using var stream = await response.Content.ReadAsStreamAsync(cts.Token);
@@ -436,11 +548,10 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         }
     }
 
-    private static ReadOnlySpan<byte> CanonicalAnchor
-        => "<link rel=\"canonical\" href=\"https://www.youtube.com/channel/"u8;
+    private static ReadOnlySpan<byte> CanonicalAnchor =>
+        "<link rel=\"canonical\" href=\"https://www.youtube.com/channel/"u8;
 
-    private static ReadOnlySpan<byte> ExternalIdAnchor
-        => "\"externalId\":\""u8;
+    private static ReadOnlySpan<byte> ExternalIdAnchor => "\"externalId\":\""u8;
 
     public static async Task<string?> ScanForChannelIdAsync(Stream stream, CancellationToken ct)
     {
@@ -485,7 +596,11 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         return TryExtractAfter(span, ExternalIdAnchor, out id);
     }
 
-    private static bool TryExtractAfter(ReadOnlySpan<byte> span, ReadOnlySpan<byte> anchor, out string? id)
+    private static bool TryExtractAfter(
+        ReadOnlySpan<byte> span,
+        ReadOnlySpan<byte> anchor,
+        out string? id
+    )
     {
         id = null;
         var searchStart = 0;
@@ -527,11 +642,16 @@ public sealed partial class FeedsService : INService, IReadyExecutor
 
         foreach (var b in value)
         {
-            var ok = b is >= (byte)'A' and <= (byte)'Z'
-                     or >= (byte)'a' and <= (byte)'z'
-                     or >= (byte)'0' and <= (byte)'9'
-                     or (byte)'_'
-                     or (byte)'-';
+            var ok =
+                b
+                is >= (byte)'A'
+                    and <= (byte)'Z'
+                    or >= (byte)'a'
+                    and <= (byte)'z'
+                    or >= (byte)'0'
+                    and <= (byte)'9'
+                    or (byte)'_'
+                    or (byte)'-';
             if (!ok)
                 return false;
         }

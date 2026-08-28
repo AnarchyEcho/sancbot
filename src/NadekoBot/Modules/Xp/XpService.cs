@@ -1,19 +1,19 @@
-#nullable disable warnings
+﻿#nullable disable warnings
 using LinqToDB;
+using LinqToDB.Data;
+using LinqToDB.EntityFrameworkCore;
+using LinqToDB.Tools;
 using Microsoft.EntityFrameworkCore;
 using NadekoBot.Common.ModuleBehaviors;
 using NadekoBot.Db.Models;
+using NadekoBot.Modules.Administration;
+using NadekoBot.Modules.Patronage;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using LinqToDB.Data;
-using LinqToDB.EntityFrameworkCore;
-using LinqToDB.Tools;
-using NadekoBot.Modules.Administration;
-using NadekoBot.Modules.Patronage;
 using ArgumentOutOfRangeException = System.ArgumentOutOfRangeException;
 using Color = SixLabors.ImageSharp.Color;
 using Exception = System.Exception;
@@ -162,7 +162,9 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
                     if (oldBatch.Contains(u))
                     {
-                        validUsers.Add(new(g.Id, u.Id, u.Username, u.DisplayAvatarId, rate.Amount, vc.Id));
+                        validUsers.Add(
+                            new(g.Id, u.Id, u.Username, u.DisplayAvatarId, rate.Amount, vc.Id)
+                        );
                     }
 
                     _voiceXpBatch.Add(u);
@@ -202,31 +204,46 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         var tempTableName = "xptemp_" + Guid.NewGuid().ToString("N");
         await using var batchTable = await lctx.CreateTempTableAsync<UserXpBatch>(tempTableName);
 
-        await batchTable.BulkCopyAsync(currentBatch.Select(static x => new UserXpBatch()
-        {
-            GuildId = x.GuildId,
-            UserId = x.UserId,
-            Username = x.Username,
-            AvatarId = x.AvatarId,
-            XpToGain = x.Xp
-        }));
+        await batchTable.BulkCopyAsync(
+            currentBatch.Select(static x => new UserXpBatch()
+            {
+                GuildId = x.GuildId,
+                UserId = x.UserId,
+                Username = x.Username,
+                AvatarId = x.AvatarId,
+                XpToGain = x.Xp,
+            })
+        );
 
         await lctx.ExecuteAsync(
             $"""
-             INSERT INTO UserXpStats (GuildId, UserId, Xp)
-             SELECT "{tempTableName}"."GuildId", "{tempTableName}"."UserId", "XpToGain"
-             FROM {tempTableName}
-             WHERE TRUE
-             ON CONFLICT (GuildId, UserId) DO UPDATE 
-             SET 
-                 Xp = UserXpStats.Xp + EXCLUDED.Xp;
-             """);
+            INSERT INTO UserXpStats (GuildId, UserId, Xp)
+            SELECT "{tempTableName}"."GuildId", "{tempTableName}"."UserId", "XpToGain"
+            FROM {tempTableName}
+            WHERE TRUE
+            ON CONFLICT (GuildId, UserId) DO UPDATE 
+            SET Xp = UserXpStats.Xp + EXCLUDED.Xp;
+            """
+        );
 
+        await lctx.ExecuteAsync(
+            $"""
+            INSERT INTO DiscordUser (UserId, Username, AvatarId, CurrencyAmount)
+            SELECT "UserId", "Username", "AvatarId", SUM("XpToGain")
+            FROM {tempTableName}
+            WHERE TRUE
+            GROUP BY "UserId"
+            ON CONFLICT (UserId) DO UPDATE
+            SET CurrencyAmount = DiscordUser.CurrencyAmount + (EXCLUDED.CurrencyAmount * 2);
+            """
+        );
 
         var updated = await batchTable
-            .InnerJoin(lctx.GetTable<UserXpStats>(),
+            .InnerJoin(
+                lctx.GetTable<UserXpStats>(),
                 (u, s) => u.GuildId == s.GuildId && u.UserId == s.UserId,
-                (batch, stats) => stats)
+                (batch, stats) => stats
+            )
             .ToListAsyncLinqToDB();
 
         await tx.CommitAsync();
@@ -243,11 +260,9 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
             if (oldStats.Level < newStats.Level)
             {
-                await _levelUpQueue.EnqueueAsync(NotifyUser(u.GuildId,
-                    data.ChannelId,
-                    u.UserId,
-                    oldStats.Level,
-                    newStats.Level));
+                await _levelUpQueue.EnqueueAsync(
+                    NotifyUser(u.GuildId, data.ChannelId, u.UserId, oldStats.Level, newStats.Level)
+                );
             }
         }
     }
@@ -257,8 +272,9 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         ulong? channelId,
         ulong userId,
         long oldLevel,
-        long newLevel)
-        => async () =>
+        long newLevel
+    ) =>
+        async () =>
         {
             await HandleRewardsInternalAsync(guildId, userId, oldLevel, newLevel);
 
@@ -269,7 +285,8 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         ulong guildId,
         ulong userId,
         long oldLevel,
-        long newLevel)
+        long newLevel
+    )
     {
         var settings = await GetFullXpSettingsFor(guildId);
         var rrews = settings.RoleRewards;
@@ -278,8 +295,10 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         //loop through levels since last level up, so if a high amount of xp is gained, reward are still applied.
         for (var i = oldLevel + 1; i <= newLevel; i++)
         {
-            var rrew = rrews.FirstOrDefault(x => x.Level == i);
-            if (rrew is not null)
+            // A level can now have both an "add role" reward and a "remove role" reward
+            // at the same time, so we go through all matching rows instead of just the first one.
+            var levelRrews = rrews.Where(x => x.Level == i);
+            foreach (var rrew in levelRrews)
             {
                 var guild = _client.GetGuild(guildId);
                 var role = guild?.GetRole(rrew.RoleId);
@@ -292,19 +311,25 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                         try
                         {
                             await user.RemoveRoleAsync(role);
-                            await _notifySub.NotifyAsync(new RemoveRoleRewardNotifyModel(guild.Id,
+                            await _notifySub.NotifyAsync(
+                                new RemoveRoleRewardNotifyModel(
+                                    guild.Id,
                                     role.Id,
                                     user.Id,
-                                    newLevel),
-                                isShardLocal: true);
+                                    newLevel
+                                ),
+                                isShardLocal: true
+                            );
                         }
                         catch (Exception ex)
                         {
-                            Log.Warning(ex,
+                            Log.Warning(
+                                ex,
                                 "Unable to remove role {RoleId} from user {UserId}: {Message}",
                                 role.Id,
                                 user.Id,
-                                ex.Message);
+                                ex.Message
+                            );
                         }
                     }
                     else
@@ -312,19 +337,20 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                         try
                         {
                             await user.AddRoleAsync(role);
-                            await _notifySub.NotifyAsync(new AddRoleRewardNotifyModel(guild.Id,
-                                    role.Id,
-                                    user.Id,
-                                    newLevel),
-                                isShardLocal: true);
+                            await _notifySub.NotifyAsync(
+                                new AddRoleRewardNotifyModel(guild.Id, role.Id, user.Id, newLevel),
+                                isShardLocal: true
+                            );
                         }
                         catch (Exception ex)
                         {
-                            Log.Warning(ex,
+                            Log.Warning(
+                                ex,
                                 "Unable to add role {RoleId} to user {UserId}: {Message}",
                                 role.Id,
                                 user.Id,
-                                ex.Message);
+                                ex.Message
+                            );
                         }
                     }
                 }
@@ -344,7 +370,8 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         ulong guildId,
         ulong? channelId,
         ulong userId,
-        long newLevel)
+        long newLevel
+    )
     {
         var guild = _client.GetGuild(guildId);
         var user = guild?.GetUser(userId);
@@ -357,7 +384,7 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
             GuildId = guildId,
             UserId = userId,
             ChannelId = channelId,
-            Level = newLevel
+            Level = newLevel,
         };
         await _notifySub.NotifyAsync(model, true);
         return;
@@ -366,7 +393,10 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
     public async Task SetCurrencyReward(ulong guildId, int level, int amount)
     {
         await using var uow = _db.GetDbContext();
-        var settings = await uow.XpSettingsFor(guildId, set => set.LoadWith(x => x.CurrencyRewards));
+        var settings = await uow.XpSettingsFor(
+            guildId,
+            set => set.LoadWith(x => x.CurrencyRewards)
+        );
 
         if (amount <= 0)
         {
@@ -385,11 +415,7 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                 rew.Amount = amount;
             else
             {
-                settings.CurrencyRewards.Add(new()
-                {
-                    Level = level,
-                    Amount = amount
-                });
+                settings.CurrencyRewards.Add(new() { Level = level, Amount = amount });
             }
         }
 
@@ -399,18 +425,25 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
     public async Task<XpSettings> GetFullXpSettingsFor(ulong guildId)
     {
         await using var uow = _db.GetDbContext();
-        return await uow.XpSettingsFor(guildId,
-            set => set
-                .LoadWith(x => x.CurrencyRewards)
-                .LoadWith(x => x.RoleRewards));
+        return await uow.XpSettingsFor(
+            guildId,
+            set => set.LoadWith(x => x.CurrencyRewards).LoadWith(x => x.RoleRewards)
+        );
     }
 
-    public async Task ResetRoleRewardAsync(ulong guildId, int level)
+    /// <summary>
+    /// Clears the role reward for a specific level and action (add or remove).
+    /// A level can have up to 2 role rewards at once: one "add role" and one "remove role",
+    /// so the action has to be specified to know which one to clear.
+    /// </summary>
+    public async Task ResetRoleRewardAsync(ulong guildId, int level, bool remove)
     {
         await using var uow = _db.GetDbContext();
         var settings = await uow.XpSettingsFor(guildId, set => set.LoadWith(x => x.RoleRewards));
 
-        var toRemove = settings.RoleRewards.FirstOrDefault(x => x.Level == level);
+        var toRemove = settings.RoleRewards.FirstOrDefault(x =>
+            x.Level == level && x.Remove == remove
+        );
         if (toRemove is not null)
         {
             uow.Remove(toRemove);
@@ -420,30 +453,41 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         await uow.SaveChangesAsync();
     }
 
-    public async Task SetRoleRewardAsync(
-        ulong guildId,
-        int level,
-        ulong roleId,
-        bool remove)
+    /// <summary>
+    /// Sets (or clears, if roleId is null) the role reward for a specific level and action.
+    /// Since "add role" and "remove role" are now tracked as separate rows keyed on
+    /// (Level, Remove), a single level can have both an add-role reward and a
+    /// remove-role reward configured simultaneously.
+    /// </summary>
+    public async Task SetRoleRewardAsync(ulong guildId, int level, ulong? roleId, bool remove)
     {
         await using var uow = _db.GetDbContext();
         var settings = await uow.XpSettingsFor(guildId, set => set.LoadWith(x => x.RoleRewards));
 
-        var rew = settings.RoleRewards.FirstOrDefault(x => x.Level == level);
+        var rew = settings.RoleRewards.FirstOrDefault(x => x.Level == level && x.Remove == remove);
 
-        if (rew is not null)
+        if (roleId is null)
         {
-            rew.RoleId = roleId;
-            rew.Remove = remove;
+            if (rew is not null)
+            {
+                uow.Remove(rew);
+                settings.RoleRewards.Remove(rew);
+            }
+        }
+        else if (rew is not null)
+        {
+            rew.RoleId = roleId.Value;
         }
         else
         {
-            settings.RoleRewards.Add(new()
-            {
-                Level = level,
-                RoleId = roleId,
-                Remove = remove,
-            });
+            settings.RoleRewards.Add(
+                new()
+                {
+                    Level = level,
+                    RoleId = roleId.Value,
+                    Remove = remove,
+                }
+            );
         }
 
         await uow.SaveChangesAsync();
@@ -453,15 +497,18 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
     {
         await using var uow = _db.GetDbContext();
         return await uow
-            .UserXpStats
-            .Where(x => x.GuildId == guildId)
+            .UserXpStats.Where(x => x.GuildId == guildId)
             .OrderByDescending(x => x.Xp)
             .Skip(page * 10)
             .Take(10)
             .ToArrayAsyncLinqToDB();
     }
 
-    public async Task<IReadOnlyCollection<UserXpStats>> GetGuildUserXps(ulong guildId, List<ulong> users, int page)
+    public async Task<IReadOnlyCollection<UserXpStats>> GetGuildUserXps(
+        ulong guildId,
+        List<ulong> users,
+        int page
+    )
     {
         await using var uow = _db.GetDbContext();
         return await uow.Set<UserXpStats>()
@@ -487,8 +534,8 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         return false;
     }
 
-    private static bool UserParticipatingInVoiceChannel(SocketGuildUser user)
-        => !user.IsDeafened && !user.IsMuted && !user.IsSelfDeafened && !user.IsSelfMuted;
+    private static bool UserParticipatingInVoiceChannel(SocketGuildUser user) =>
+        !user.IsDeafened && !user.IsMuted && !user.IsSelfDeafened && !user.IsSelfMuted;
 
     public ValueTask ExecOnNoCommandAsync(IGuild? guild, IUserMessage arg)
     {
@@ -513,9 +560,17 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
         var isText = arg.Content.Contains(' ') || arg.Content.Length >= 5;
 
-        var (textRate, isItemRate) = _xpRateRateService.GetXpRate(XpRateType.Text, guild!.Id, gc.Id);
+        var (textRate, isItemRate) = _xpRateRateService.GetXpRate(
+            XpRateType.Text,
+            guild!.Id,
+            gc.Id
+        );
         if (!isItemRate && gc is SocketThreadChannel tc)
-            (textRate, _) = _xpRateRateService.GetXpRate(XpRateType.Text, guild.Id, tc.ParentChannel.Id);
+            (textRate, _) = _xpRateRateService.GetXpRate(
+                XpRateType.Text,
+                guild.Id,
+                tc.ParentChannel.Id
+            );
 
         XpRate rate;
         if (isImage)
@@ -541,7 +596,14 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         if (!TryAddUserGainedXp(user.Id, rate.Cooldown))
             return default;
 
-        _usersBatch[user.Id] = new(guild.Id, user.Id, user.Username, user.DisplayAvatarId, rate.Amount, gc.Id);
+        _usersBatch[user.Id] = new(
+            guild.Id,
+            user.Id,
+            user.Username,
+            user.DisplayAvatarId,
+            rate.Amount,
+            gc.Id
+        );
 
         return default;
     }
@@ -563,13 +625,20 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
     public Task AddXpAsync(ulong channelId, long amount, params IGuildUser[] users)
     {
         foreach (var user in users)
-            _usersBatch[user.Id] = new(user.GuildId, user.Id, user.Username, user.DisplayAvatarId, amount, channelId);
+            _usersBatch[user.Id] = new(
+                user.GuildId,
+                user.Id,
+                user.Username,
+                user.DisplayAvatarId,
+                amount,
+                channelId
+            );
 
         return Task.CompletedTask;
     }
-    
-    private bool TryAddUserGainedXp(ulong userId, float cdInMinutes)
-        => _xpCooldowns.TryAddCooldown(userId, cdInMinutes);
+
+    private bool TryAddUserGainedXp(ulong userId, float cdInMinutes) =>
+        _xpCooldowns.TryAddCooldown(userId, cdInMinutes);
 
     public async Task<FullUserStats> GetUserStatsAsync(IGuildUser user)
     {
@@ -580,10 +649,7 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         await uow.SaveChangesAsync();
 
         var f = _xpFormula.GetFormula(user.GuildId);
-        return new(du,
-            stats,
-            new(stats.Xp, f.A, f.C),
-            guildRank);
+        return new(du, stats, new(stats.Xp, f.A, f.C), guildRank);
     }
 
     public async Task<(Stream Image, IImageFormat Format)> GenerateXpImageAsync(IGuildUser user)
@@ -592,8 +658,8 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         return await GenerateXpImageAsync(stats);
     }
 
-    public Task<(Stream Image, IImageFormat Format)> GenerateXpImageAsync(FullUserStats stats)
-        => Task.Run(async () =>
+    public Task<(Stream Image, IImageFormat Format)> GenerateXpImageAsync(FullUserStats stats) =>
+        Task.Run(async () =>
         {
             var template = _templateService.GetTemplate();
             var bgBytes = await GetXpBackgroundAsync(stats.User.UserId);
@@ -621,11 +687,13 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     var avatarData = await http.GetByteArrayAsync(avatarUrl);
                     using var tempDraw = Image.Load<Rgba32>(avatarData);
 
-                    tempDraw.Mutate(x => x
-                        .Resize(template.User.Icon.Size.X, template.User.Icon.Size.Y)
-                        .ApplyRoundedCorners(Math.Max(template.User.Icon.Size.X,
-                                                 template.User.Icon.Size.Y)
-                                             / 2.0f));
+                    tempDraw.Mutate(x =>
+                        x.Resize(template.User.Icon.Size.X, template.User.Icon.Size.Y)
+                            .ApplyRoundedCorners(
+                                Math.Max(template.User.Icon.Size.X, template.User.Icon.Size.Y)
+                                    / 2.0f
+                            )
+                    );
                     await using var stream = await tempDraw.ToStreamAsync();
                     var data = stream.ToArray();
                     await _c.SetImageDataAsync(avatarUrl, data);
@@ -639,7 +707,6 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
             using var img = Image.Load<Rgba32>(bgBytes);
 
-
             img.Mutate(x =>
             {
                 if (template.User.Name.Show)
@@ -651,19 +718,23 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     var size = TextMeasurer.MeasureSize($"@{username}", new(usernameFont));
                     var scale = 400f / size.Width;
                     if (scale < 1)
-                        usernameFont = _fonts.NotoSans.CreateFont(template.User.Name.FontSize * scale, FontStyle.Bold);
+                        usernameFont = _fonts.NotoSans.CreateFont(
+                            template.User.Name.FontSize * scale,
+                            FontStyle.Bold
+                        );
 
-                    x.DrawText(new RichTextOptions(usernameFont)
+                    x.DrawText(
+                        new RichTextOptions(usernameFont)
                         {
                             HorizontalAlignment = HorizontalAlignment.Left,
                             VerticalAlignment = VerticalAlignment.Center,
                             FallbackFontFamilies = _fonts.FallBackFonts,
-                            Origin = new(template.User.Name.Pos.X, template.User.Name.Pos.Y + 8)
+                            Origin = new(template.User.Name.Pos.X, template.User.Name.Pos.Y + 8),
                         },
                         "@" + username,
-                        Brushes.Solid(template.User.Name.Color));
+                        Brushes.Solid(template.User.Name.Color)
+                    );
                 }
-
 
                 //club name
 
@@ -671,17 +742,25 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                 {
                     var clubName = stats.User.Club?.ToString() ?? "-";
 
-                    var clubFont = _fonts.NotoSans.CreateFont(template.Club.Name.FontSize, FontStyle.Regular);
+                    var clubFont = _fonts.NotoSans.CreateFont(
+                        template.Club.Name.FontSize,
+                        FontStyle.Regular
+                    );
 
-                    x.DrawText(new RichTextOptions(clubFont)
+                    x.DrawText(
+                        new RichTextOptions(clubFont)
                         {
                             HorizontalAlignment = HorizontalAlignment.Right,
                             VerticalAlignment = VerticalAlignment.Top,
                             FallbackFontFamilies = _fonts.FallBackFonts,
-                            Origin = new(template.Club.Name.Pos.X + 50, template.Club.Name.Pos.Y - 8)
+                            Origin = new(
+                                template.Club.Name.Pos.X + 50,
+                                template.Club.Name.Pos.Y - 8
+                            ),
                         },
                         clubName,
-                        Brushes.Solid(template.Club.Name.Color));
+                        Brushes.Solid(template.Club.Name.Color)
+                    );
                 }
 
                 Font GetTruncatedFont(
@@ -689,7 +768,8 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     int fontSize,
                     FontStyle style,
                     string text,
-                    int maxSize)
+                    int maxSize
+                )
                 {
                     var font = fontFamily.CreateFont(fontSize, style);
                     var size = TextMeasurer.MeasureSize(text, new(font));
@@ -700,7 +780,6 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     return font;
                 }
 
-
                 if (template.User.Level.Show)
                 {
                     var guildLevelFont = GetTruncatedFont(
@@ -708,39 +787,49 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                         template.User.Level.FontSize,
                         FontStyle.Bold,
                         stats.Guild.Level.ToString(),
-                        33);
+                        33
+                    );
 
-
-                    x.DrawText(stats.Guild.Level.ToString(),
+                    x.DrawText(
+                        stats.Guild.Level.ToString(),
                         guildLevelFont,
                         template.User.Level.Color,
-                        new(template.User.Level.Pos.X, template.User.Level.Pos.Y));
+                        new(template.User.Level.Pos.X, template.User.Level.Pos.Y)
+                    );
                 }
-
 
                 var guild = stats.Guild;
 
                 //xp bar
                 if (template.User.Xp.Bar.Show)
                 {
-                    var xpPercent = guild.RequiredXp > 0
-                        ? Math.Clamp(guild.LevelXp / (float)guild.RequiredXp, 0f, 1f)
-                        : 1f;
+                    var xpPercent =
+                        guild.RequiredXp > 0
+                            ? Math.Clamp(guild.LevelXp / (float)guild.RequiredXp, 0f, 1f)
+                            : 1f;
                     DrawXpBar(xpPercent, template.User.Xp.Bar.Guild, img);
                 }
 
                 if (template.User.Xp.Guild.Show)
                 {
                     x.DrawText(
-                        new RichTextOptions(_fonts.NotoSans.CreateFont(template.User.Xp.Guild.FontSize,
-                            FontStyle.Bold))
+                        new RichTextOptions(
+                            _fonts.NotoSans.CreateFont(
+                                template.User.Xp.Guild.FontSize,
+                                FontStyle.Bold
+                            )
+                        )
                         {
                             HorizontalAlignment = HorizontalAlignment.Center,
                             VerticalAlignment = VerticalAlignment.Center,
-                            Origin = new(template.User.Xp.Guild.Pos.X, template.User.Xp.Guild.Pos.Y)
+                            Origin = new(
+                                template.User.Xp.Guild.Pos.X,
+                                template.User.Xp.Guild.Pos.Y
+                            ),
                         },
                         $"{guild.LevelXp}/{guild.RequiredXp}",
-                        Brushes.Solid(template.User.Xp.Guild.Color));
+                        Brushes.Solid(template.User.Xp.Guild.Color)
+                    );
                 }
 
                 var rankPen = new SolidPen(Color.White, 1);
@@ -755,12 +844,13 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                         template.User.Rank.FontSize,
                         FontStyle.Bold,
                         guildRankStr,
-                        22);
+                        22
+                    );
 
                     x.DrawText(
                         new RichTextOptions(guildRankFont)
                         {
-                            Origin = new(template.User.Rank.Pos.X, template.User.Rank.Pos.Y)
+                            Origin = new(template.User.Rank.Pos.X, template.User.Rank.Pos.Y),
                         },
                         guildRankStr,
                         Brushes.Solid(template.User.Rank.Color),
@@ -777,12 +867,19 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     try
                     {
                         using var toDraw = Image.Load(avImageData);
-                        if (toDraw.Size != new Size(template.User.Icon.Size.X, template.User.Icon.Size.Y))
-                            toDraw.Mutate(x => x.Resize(template.User.Icon.Size.X, template.User.Icon.Size.Y));
+                        if (
+                            toDraw.Size
+                            != new Size(template.User.Icon.Size.X, template.User.Icon.Size.Y)
+                        )
+                            toDraw.Mutate(x =>
+                                x.Resize(template.User.Icon.Size.X, template.User.Icon.Size.Y)
+                            );
 
-                        mut.DrawImage(toDraw,
+                        mut.DrawImage(
+                            toDraw,
                             new Point(template.User.Icon.Pos.X, template.User.Icon.Pos.Y),
-                            1);
+                            1
+                        );
                     }
                     catch (Exception ex)
                     {
@@ -857,14 +954,33 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
         var length = info.Length * percent;
 
-        float x3, x4, y3, y4;
+        float x3,
+            x4,
+            y3,
+            y4;
 
         var matrix = info.Direction switch
         {
-            XpTemplateDirection.Down => new float[,] { { 0, 1 }, { 0, 1 } },
-            XpTemplateDirection.Up => new float[,] { { 0, -1 }, { 0, -1 } },
-            XpTemplateDirection.Left => new float[,] { { -1, 0 }, { -1, 0 } },
-            _ => new float[,] { { 1, 0 }, { 1, 0 } },
+            XpTemplateDirection.Down => new float[,]
+            {
+                { 0, 1 },
+                { 0, 1 },
+            },
+            XpTemplateDirection.Up => new float[,]
+            {
+                { 0, -1 },
+                { 0, -1 },
+            },
+            XpTemplateDirection.Left => new float[,]
+            {
+                { -1, 0 },
+                { -1, 0 },
+            },
+            _ => new float[,]
+            {
+                { 1, 0 },
+                { 1, 0 },
+            },
         };
 
         x3 = x1 + matrix[0, 0] * length;
@@ -872,11 +988,15 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         y3 = y1 + matrix[0, 1] * length;
         y4 = y2 + matrix[1, 1] * length;
 
-        img.Mutate(x => x.FillPolygon(info.Color,
-            new PointF(x1, y1),
-            new PointF(x3, y3),
-            new PointF(x4, y4),
-            new PointF(x2, y2)));
+        img.Mutate(x =>
+            x.FillPolygon(
+                info.Color,
+                new PointF(x1, y1),
+                new PointF(x3, y3),
+                new PointF(x4, y4),
+                new PointF(x2, y2)
+            )
+        );
     }
 
     private async Task DrawClubImage(XpTemplate template, Image<Rgba32> img, FullUserStats stats)
@@ -890,7 +1010,12 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                 if (!result.TryPickT0(out var data, out _))
                 {
                     using (var http = _httpFactory.CreateClient())
-                    using (var temp = await http.GetAsync(imgUrl, HttpCompletionOption.ResponseHeadersRead))
+                    using (
+                        var temp = await http.GetAsync(
+                            imgUrl,
+                            HttpCompletionOption.ResponseHeadersRead
+                        )
+                    )
                     {
                         if (!temp.IsImage() || temp.GetContentLength() > 11 * 1024 * 1024)
                             return;
@@ -898,11 +1023,15 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                         var imgData = await temp.Content.ReadAsByteArrayAsync();
                         using (var tempDraw = Image.Load<Rgba32>(imgData))
                         {
-                            tempDraw.Mutate(x => x
-                                .Resize(template.Club.Icon.Size.X, template.Club.Icon.Size.Y)
-                                .ApplyRoundedCorners(Math.Max(template.Club.Icon.Size.X,
-                                                         template.Club.Icon.Size.Y)
-                                                     / 2.0f));
+                            tempDraw.Mutate(x =>
+                                x.Resize(template.Club.Icon.Size.X, template.Club.Icon.Size.Y)
+                                    .ApplyRoundedCorners(
+                                        Math.Max(
+                                            template.Club.Icon.Size.X,
+                                            template.Club.Icon.Size.Y
+                                        ) / 2.0f
+                                    )
+                            );
                             await using (var tds = await tempDraw.ToStreamAsync())
                             {
                                 data = tds.ToArray();
@@ -915,12 +1044,17 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
 
                 using var toDraw = Image.Load(data);
                 if (toDraw.Size != new Size(template.Club.Icon.Size.X, template.Club.Icon.Size.Y))
-                    toDraw.Mutate(x => x.Resize(template.Club.Icon.Size.X, template.Club.Icon.Size.Y));
+                    toDraw.Mutate(x =>
+                        x.Resize(template.Club.Icon.Size.X, template.Club.Icon.Size.Y)
+                    );
 
-                img.Mutate(x => x.DrawImage(
-                    toDraw,
-                    new Point(template.Club.Icon.Pos.X, template.Club.Icon.Pos.Y),
-                    1));
+                img.Mutate(x =>
+                    x.DrawImage(
+                        toDraw,
+                        new Point(template.Club.Icon.Pos.X, template.Club.Icon.Pos.Y),
+                        1
+                    )
+                );
             }
             catch (Exception ex)
             {
@@ -946,9 +1080,7 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
     public async Task ResetXpRewards(ulong guildId)
     {
         await using var uow = _db.GetDbContext();
-        await uow.GetTable<XpSettings>()
-            .Where(x => x.GuildId == guildId)
-            .DeleteAsync();
+        await uow.GetTable<XpSettings>().Where(x => x.GuildId == guildId).DeleteAsync();
     }
 
     public ValueTask<Dictionary<string, XpConfig.ShopItemInfo>?> GetShopBgs()
@@ -957,8 +1089,11 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         if (!data.Shop.IsEnabled)
             return new(default(Dictionary<string, XpConfig.ShopItemInfo>));
 
-        return new(_xpConfig.Data.Shop.Bgs?.Where(x => x.Value.Price >= 0)
-            .ToDictionary(x => x.Key, x => x.Value));
+        return new(
+            _xpConfig
+                .Data.Shop.Bgs?.Where(x => x.Value.Price >= 0)
+                .ToDictionary(x => x.Key, x => x.Value)
+        );
     }
 
     public ValueTask<Dictionary<string, XpConfig.ShopItemInfo>?> GetShopFrames()
@@ -967,8 +1102,11 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         if (!data.Shop.IsEnabled)
             return new(default(Dictionary<string, XpConfig.ShopItemInfo>));
 
-        return new(_xpConfig.Data.Shop.Frames?.Where(x => x.Value.Price >= 0)
-            .ToDictionary(x => x.Key, x => x.Value));
+        return new(
+            _xpConfig
+                .Data.Shop.Frames?.Where(x => x.Value.Price >= 0)
+                .ToDictionary(x => x.Key, x => x.Value)
+        );
     }
 
     public async Task<BuyResult> BuyShopItemAsync(ulong userId, XpShopItemType type, string key)
@@ -981,8 +1119,12 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         await using var ctx = _db.GetDbContext();
         try
         {
-            if (await ctx.GetTable<XpShopOwnedItem>()
-                    .AnyAsyncLinqToDB(x => x.UserId == userId && x.ItemKey == key && x.ItemType == type))
+            if (
+                await ctx.GetTable<XpShopOwnedItem>()
+                    .AnyAsyncLinqToDB(x =>
+                        x.UserId == userId && x.ItemKey == key && x.ItemType == type
+                    )
+            )
                 return BuyResult.AlreadyOwned;
 
             var item = GetShopItem(type, key);
@@ -990,19 +1132,27 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
             if (item is null || item.Price < 0)
                 return BuyResult.UnknownItem;
 
-            if (item.Price > 0 && !await _cs.RemoveAsync(userId, item.Price, new("xpshop", "buy", $"Background {key}")))
+            if (
+                item.Price > 0
+                && !await _cs.RemoveAsync(
+                    userId,
+                    item.Price,
+                    new("xpshop", "buy", $"Background {key}")
+                )
+            )
                 return BuyResult.InsufficientFunds;
 
-
             await ctx.GetTable<XpShopOwnedItem>()
-                .InsertAsync(() => new XpShopOwnedItem()
-                {
-                    UserId = userId,
-                    IsUsing = false,
-                    ItemKey = key,
-                    ItemType = type,
-                    DateAdded = DateTime.UtcNow,
-                });
+                .InsertAsync(() =>
+                    new XpShopOwnedItem()
+                    {
+                        UserId = userId,
+                        IsUsing = false,
+                        ItemKey = key,
+                        ItemType = type,
+                        DateAdded = DateTime.UtcNow,
+                    }
+                );
 
             return BuyResult.Success;
         }
@@ -1035,16 +1185,13 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         throw new ArgumentOutOfRangeException(nameof(type));
     }
 
-    public async Task<bool> OwnsItemAsync(
-        ulong userId,
-        XpShopItemType itemType,
-        string key)
+    public async Task<bool> OwnsItemAsync(ulong userId, XpShopItemType itemType, string key)
     {
         await using var ctx = _db.GetDbContext();
         return await ctx.GetTable<XpShopOwnedItem>()
-            .AnyAsyncLinqToDB(x => x.UserId == userId
-                                   && x.ItemType == itemType
-                                   && x.ItemKey == key);
+            .AnyAsyncLinqToDB(x =>
+                x.UserId == userId && x.ItemType == itemType && x.ItemKey == key
+            );
     }
 
     public async Task<IReadOnlyList<XpShopOwnedItem>> GetUserOwnedItemsAsync(ulong userId)
@@ -1054,27 +1201,27 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
             .Where(x => x.UserId == userId)
             .ToListAsyncLinqToDB();
     }
+
     public async Task<XpShopOwnedItem?> GetUserItemAsync(
         ulong userId,
         XpShopItemType itemType,
-        string key)
+        string key
+    )
     {
         await using var ctx = _db.GetDbContext();
         return await ctx.GetTable<XpShopOwnedItem>()
-            .FirstOrDefaultAsyncLinqToDB(x => x.UserId == userId
-                                              && x.ItemType == itemType
-                                              && x.ItemKey == key);
+            .FirstOrDefaultAsyncLinqToDB(x =>
+                x.UserId == userId && x.ItemType == itemType && x.ItemKey == key
+            );
     }
 
-    public async Task<XpShopOwnedItem?> GetItemInUse(
-        ulong userId,
-        XpShopItemType itemType)
+    public async Task<XpShopOwnedItem?> GetItemInUse(ulong userId, XpShopItemType itemType)
     {
         await using var ctx = _db.GetDbContext();
         return await ctx.GetTable<XpShopOwnedItem>()
-            .FirstOrDefaultAsyncLinqToDB(x => x.UserId == userId
-                                              && x.ItemType == itemType
-                                              && x.IsUsing);
+            .FirstOrDefaultAsyncLinqToDB(x =>
+                x.UserId == userId && x.ItemType == itemType && x.IsUsing
+            );
     }
 
     public async Task<bool> UseShopItemAsync(ulong userId, XpShopItemType itemType, string key)
@@ -1099,10 +1246,7 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         {
             await ctx.GetTable<XpShopOwnedItem>()
                 .Where(x => x.UserId == userId && x.ItemType == itemType)
-                .UpdateAsync(old => new()
-                {
-                    IsUsing = key == old.ItemKey
-                });
+                .UpdateAsync(old => new() { IsUsing = key == old.ItemKey });
 
             return true;
         }
@@ -1110,15 +1254,18 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         return false;
     }
 
-    public bool IsShopEnabled()
-        => _xpConfig.Data.Shop.IsEnabled;
+    public bool IsShopEnabled() => _xpConfig.Data.Shop.IsEnabled;
 
-    public async Task<int> GetGuildXpUsersCountAsync(ulong requestGuildId, List<ulong>? guildUsers = null)
+    public async Task<int> GetGuildXpUsersCountAsync(
+        ulong requestGuildId,
+        List<ulong>? guildUsers = null
+    )
     {
         await using var ctx = _db.GetDbContext();
         return await ctx.GetTable<UserXpStats>()
-            .Where(x => x.GuildId == requestGuildId
-                        && (guildUsers == null || guildUsers.Contains(x.UserId)))
+            .Where(x =>
+                x.GuildId == requestGuildId && (guildUsers == null || guildUsers.Contains(x.UserId))
+            )
             .CountAsyncLinqToDB();
     }
 
@@ -1128,22 +1275,18 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         var lvlStats = LevelStats.CreateForLevel(level, f.A, f.C);
         await using var ctx = _db.GetDbContext();
         await ctx.GetTable<UserXpStats>()
-            .InsertOrUpdateAsync(() => new()
-                {
-                    GuildId = guildId,
-                    UserId = userId,
-                    Xp = lvlStats.TotalXp,
-                    DateAdded = DateTime.UtcNow
-                },
-                (old) => new()
-                {
-                    Xp = lvlStats.TotalXp
-                },
-                () => new()
-                {
-                    GuildId = guildId,
-                    UserId = userId
-                });
+            .InsertOrUpdateAsync(
+                () =>
+                    new()
+                    {
+                        GuildId = guildId,
+                        UserId = userId,
+                        Xp = lvlStats.TotalXp,
+                        DateAdded = DateTime.UtcNow,
+                    },
+                (old) => new() { Xp = lvlStats.TotalXp },
+                () => new() { GuildId = guildId, UserId = userId }
+            );
     }
 }
 
@@ -1153,4 +1296,5 @@ public readonly record struct XpQueueEntry(
     string Username,
     string AvatarId,
     long Xp,
-    ulong? ChannelId);
+    ulong? ChannelId
+);

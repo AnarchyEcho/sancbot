@@ -1,6 +1,10 @@
 namespace NadekoBot.Modules.Utility.AiAgent.Adapters;
 
-// Kept here, so the long prompt strings do not bloat the adapter classes.
+/// <summary>
+/// System prompt fragments used as <see cref="NadekoBot.AiAgent.AiSystemGuidanceAttribute"/>
+/// values. Centralized here so the prompt copy is greppable and the long strings
+/// don't bloat the adapter classes.
+/// </summary>
 internal static class SystemGuidanceText
 {
     public const string SearchCommands = """

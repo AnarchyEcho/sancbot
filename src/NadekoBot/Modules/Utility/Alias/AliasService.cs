@@ -13,16 +13,12 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
     private readonly IMessageSenderService _sender;
     private readonly ShardData _shardData;
 
-    public AliasService(
-        DbService db,
-        IMessageSenderService sender,
-        ShardData shardData)
+    public AliasService(DbService db, IMessageSenderService sender, ShardData shardData)
     {
         _sender = sender;
         _shardData = shardData;
 
         using var uow = db.GetDbContext();
-
 
         _db = db;
     }
@@ -34,8 +30,8 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
         await using var uow = _db.GetDbContext();
 
         var deleted = await uow.GetTable<CommandAlias>()
-                               .Where(x => x.GuildId == guildId)
-                               .DeleteAsync();
+            .Where(x => x.GuildId == guildId)
+            .DeleteAsync();
 
         return deleted;
     }
@@ -44,7 +40,8 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
         IGuild? guild,
         IMessageChannel channel,
         IUser user,
-        string input)
+        string input
+    )
     {
         if (guild is null || string.IsNullOrWhiteSpace(input))
             return null;
@@ -77,17 +74,17 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
 
             if (newInput is not null)
             {
-                try
-                {
-                    var toDelete = await _sender.Response(channel)
-                                                .Confirm($"{input} => {newInput}")
-                                                .SendAsync();
-                    toDelete.DeleteAfter(1.5f);
-                }
-                catch
-                {
-                    // ignored
-                }
+                // try
+                // {
+                //     var toDelete = await _sender.Response(channel)
+                //                                 .Confirm($"{input} => {newInput}")
+                //                                 .SendAsync();
+                //     toDelete.DeleteAfter(1.5f);
+                // }
+                // catch
+                // {
+                //     // ignored
+                // }
 
                 return newInput;
             }
@@ -103,16 +100,21 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
         await using var ctx = _db.GetDbContext();
 
         var aliases = ctx.GetTable<CommandAlias>()
-                         .Where(Queries.GuildOnShard<CommandAlias>(x => x.GuildId,
-                             _shardData.TotalShards,
-                             _shardData.ShardId))
-                         .ToList();
+            .Where(
+                Queries.GuildOnShard<CommandAlias>(
+                    x => x.GuildId,
+                    _shardData.TotalShards,
+                    _shardData.ShardId
+                )
+            )
+            .ToList();
 
         _aliases = new();
         foreach (var alias in aliases)
         {
-            _aliases.GetOrAdd(alias.GuildId, _ => new(StringComparer.OrdinalIgnoreCase))
-                    .TryAdd(alias.Trigger, alias.Mapping);
+            _aliases
+                .GetOrAdd(alias.GuildId, _ => new(StringComparer.OrdinalIgnoreCase))
+                .TryAdd(alias.Trigger, alias.Mapping);
         }
     }
 
@@ -121,8 +123,8 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
         await using var ctx = _db.GetDbContext();
 
         var deleted = await ctx.GetTable<CommandAlias>()
-                               .Where(x => x.GuildId == guildId && x.Trigger == trigger)
-                               .DeleteAsync();
+            .Where(x => x.GuildId == guildId && x.Trigger == trigger)
+            .DeleteAsync();
 
         if (_aliases.TryGetValue(guildId, out var aliases))
             aliases.TryRemove(trigger, out _);
@@ -135,21 +137,17 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
         await using var ctx = _db.GetDbContext();
 
         await ctx.GetTable<CommandAlias>()
-                 .InsertOrUpdateAsync(() => new()
-                     {
-                         GuildId = guildId,
-                         Trigger = trigger,
-                         Mapping = mapping,
-                     },
-                     (old) => new()
-                     {
-                         Mapping = mapping
-                     },
-                     () => new()
-                     {
-                         GuildId = guildId,
-                         Trigger = trigger,
-                     });
+            .InsertOrUpdateAsync(
+                () =>
+                    new()
+                    {
+                        GuildId = guildId,
+                        Trigger = trigger,
+                        Mapping = mapping,
+                    },
+                (old) => new() { Mapping = mapping },
+                () => new() { GuildId = guildId, Trigger = trigger }
+            );
 
         var guildDict = _aliases.GetOrAdd(guildId, (_) => new());
         guildDict[trigger] = mapping;
@@ -158,7 +156,7 @@ public class AliasService : IInputTransformer, IReadyExecutor, INService
     public async Task<IReadOnlyDictionary<string, string>?> GetAliasesAsync(ulong guildId)
     {
         await Task.Yield();
-        
+
         if (_aliases.TryGetValue(guildId, out var aliases))
             return aliases;
 

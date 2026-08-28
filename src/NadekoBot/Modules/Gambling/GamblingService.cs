@@ -57,7 +57,7 @@ public class GamblingService : INService, IReadyExecutor
         if (_client.ShardId != 0)
             return;
 
-        using var timer = new PeriodicTimer(TimeSpan.FromHours(1));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         while (await timer.WaitForNextTickAsync())
         {
             try
@@ -66,13 +66,11 @@ public class GamblingService : INService, IReadyExecutor
                 if (lifetime <= 0)
                     continue;
 
-                // The cutoff is calculated here, because SQLite cannot subtract two dates
-                // and silently matches every row when it tries.
-                var cutoff = DateTime.UtcNow - TimeSpan.FromDays(lifetime);
+                var now = DateTime.UtcNow;
+                var days = TimeSpan.FromDays(lifetime);
                 await using var uow = _db.GetDbContext();
-                await uow.GetTable<CurrencyTransaction>()
-                    .Where(ct => ct.DateAdded == null || ct.DateAdded < cutoff)
-                    .DeleteAsync();
+                await uow.Set<CurrencyTransaction>()
+                    .DeleteAsync(ct => ct.DateAdded == null || (now - ct.DateAdded) > days);
             }
             catch (Exception ex)
             {

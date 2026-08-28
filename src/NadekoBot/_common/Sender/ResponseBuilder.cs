@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 
 namespace NadekoBot.Extensions;
 
@@ -8,7 +9,7 @@ public sealed partial class ResponseBuilder
     private IMessageChannel? channel;
     private IUser? user;
     private IUserMessage? msg;
-    
+
     private string? plainText;
     private IReadOnlyCollection<EmbedBuilder>? embeds;
     private bool sanitizeMentions = true;
@@ -34,7 +35,6 @@ public sealed partial class ResponseBuilder
         Client = client;
     }
 
-
     private MessageReference? CreateMessageReference(IMessageChannel targetChannel)
     {
         if (!shouldReply)
@@ -49,15 +49,18 @@ public sealed partial class ResponseBuilder
         if (targetChannel.Id != replyTo.Channel.Id)
             return null;
 
-        return new(replyTo.Id,
+        return new(
+            replyTo.Id,
             replyTo.Channel.Id,
             (replyTo.Channel as ITextChannel)?.GuildId,
-            failIfNotExists: false);
+            failIfNotExists: false
+        );
     }
 
     public async Task<ResponseMessageModel> BuildAsync(bool ephemeral)
     {
-        var targetChannel = await InternalResolveChannel() ?? throw new ArgumentNullException(nameof(channel));
+        var targetChannel =
+            await InternalResolveChannel() ?? throw new ArgumentNullException(nameof(channel));
         var msgReference = CreateMessageReference(targetChannel);
 
         var txt = GetText(locTxt, targetChannel);
@@ -72,7 +75,6 @@ public sealed partial class ResponseBuilder
 
         var finalEmbed = embedBuilder?.Build();
 
-
         var buildModel = new ResponseMessageModel()
         {
             TargetChannel = targetChannel,
@@ -81,11 +83,13 @@ public sealed partial class ResponseBuilder
             User = user ?? ctx?.User,
             Embed = finalEmbed,
             Embeds = embeds?.Map(x => x.Build()),
-            SanitizeMentions = sanitizeMentions ? new(AllowedMentionTypes.Users) : AllowedMentions.All,
+            SanitizeMentions = sanitizeMentions
+                ? new(AllowedMentionTypes.Users)
+                : AllowedMentions.All,
             Ephemeral = ephemeral,
             InteractionGroup = inters is { Count: > 0 }
                 ? new NadekoInteractionGroup(inters.ToArray())
-                : null
+                : null,
         };
 
         return buildModel;
@@ -108,13 +112,15 @@ public sealed partial class ResponseBuilder
         IUserMessage sentMsg;
         if (fileStream is Stream stream)
         {
-            sentMsg = await model.TargetChannel.SendFileAsync(stream,
+            sentMsg = await model.TargetChannel.SendFileAsync(
+                stream,
                 filename: fileName,
                 model.Text,
                 embed: model.Embed,
                 components: components,
                 allowedMentions: model.SanitizeMentions,
-                messageReference: model.MessageReference);
+                messageReference: model.MessageReference
+            );
         }
         else
         {
@@ -124,7 +130,8 @@ public sealed partial class ResponseBuilder
                 embeds: model.Embeds,
                 components: components,
                 allowedMentions: model.SanitizeMentions,
-                messageReference: model.MessageReference);
+                messageReference: model.MessageReference
+            );
         }
 
         if (model.InteractionGroup is not null)
@@ -137,7 +144,10 @@ public sealed partial class ResponseBuilder
 
     private async Task<IUserMessage> SendSplitAsync(ResponseMessageModel model)
     {
-        if (model.Embed is { } embed && embed.Description?.Length > MessageSplitter.MAX_EMBED_DESC_LENGTH)
+        if (
+            model.Embed is { } embed
+            && embed.Description?.Length > MessageSplitter.MAX_EMBED_DESC_LENGTH
+        )
         {
             var chunks = new List<string>(2);
             MessageSplitter.Split(embed.Description, MessageSplitter.MAX_EMBED_DESC_LENGTH, chunks);
@@ -151,7 +161,8 @@ public sealed partial class ResponseBuilder
                 await model.TargetChannel.SendMessageAsync(
                     embed: eb.Build(),
                     allowedMentions: model.SanitizeMentions,
-                    messageReference: i == 0 ? model.MessageReference : null);
+                    messageReference: i == 0 ? model.MessageReference : null
+                );
 
                 await Task.Delay(500);
             }
@@ -163,7 +174,8 @@ public sealed partial class ResponseBuilder
                 model.Text,
                 embed: lastEb.Build(),
                 components: components,
-                allowedMentions: model.SanitizeMentions);
+                allowedMentions: model.SanitizeMentions
+            );
 
             if (model.InteractionGroup is not null)
                 await model.InteractionGroup.RunAsync(lastMsg);
@@ -179,21 +191,22 @@ public sealed partial class ResponseBuilder
             var firstMsg = await model.TargetChannel.SendMessageAsync(
                 chunks[0],
                 allowedMentions: model.SanitizeMentions,
-                messageReference: model.MessageReference);
+                messageReference: model.MessageReference
+            );
 
             IUserMessage lastMsg = firstMsg;
             for (var i = 1; i < chunks.Count; i++)
             {
                 await Task.Delay(500);
 
-                var components = i == chunks.Count - 1
-                    ? model.InteractionGroup?.CreateComponent()
-                    : null;
+                var components =
+                    i == chunks.Count - 1 ? model.InteractionGroup?.CreateComponent() : null;
 
                 lastMsg = await model.TargetChannel.SendMessageAsync(
                     chunks[i],
                     components: components,
-                    allowedMentions: model.SanitizeMentions);
+                    allowedMentions: model.SanitizeMentions
+                );
             }
 
             if (model.InteractionGroup is not null)
@@ -205,17 +218,17 @@ public sealed partial class ResponseBuilder
         return await SendAsync(model);
     }
 
-    private EmbedBuilder PaintEmbedInternal(EmbedBuilder eb)
-        => color switch
+    private EmbedBuilder PaintEmbedInternal(EmbedBuilder eb) =>
+        color switch
         {
             EmbedColor.Ok => eb.WithOkColor(),
             EmbedColor.Pending => eb.WithPendingColor(),
             EmbedColor.Error => eb.WithErrorColor(),
-            _ => throw new NotSupportedException()
+            _ => throw new NotSupportedException(),
         };
 
-    private ulong? InternalResolveGuildId(IMessageChannel? targetChannel)
-        => ctx?.Guild?.Id ?? (targetChannel as ITextChannel)?.GuildId;
+    private ulong? InternalResolveGuildId(IMessageChannel? targetChannel) =>
+        ctx?.Guild?.Id ?? (targetChannel as ITextChannel)?.GuildId;
 
     private async Task<IMessageChannel?> InternalResolveChannel()
     {
@@ -267,9 +280,15 @@ public sealed partial class ResponseBuilder
         string? title,
         string text,
         string? url = null,
-        string? footer = null)
+        string? footer = null
+    )
     {
-        var eb = _sender.CreateEmbed(ctx?.Guild?.Id ??  (channel as ITextChannel)?.GuildId ?? (user as IGuildUser)?.GuildId)
+        var eb = _sender
+            .CreateEmbed(
+                ctx?.Guild?.Id
+                    ?? (channel as ITextChannel)?.GuildId
+                    ?? (user as IGuildUser)?.GuildId
+            )
             .WithDescription(text);
 
         if (!string.IsNullOrWhiteSpace(title))
@@ -288,7 +307,8 @@ public sealed partial class ResponseBuilder
         string? title,
         string text,
         string? url = null,
-        string? footer = null)
+        string? footer = null
+    )
     {
         InternalCreateEmbed(title, text, url, footer);
         color = EmbedColor.Ok;
@@ -299,7 +319,8 @@ public sealed partial class ResponseBuilder
         string? title,
         string text,
         string? url = null,
-        string? footer = null)
+        string? footer = null
+    )
     {
         InternalCreateEmbed(title, text, url, footer);
         color = EmbedColor.Error;
@@ -310,7 +331,8 @@ public sealed partial class ResponseBuilder
         string? title,
         string text,
         string? url = null,
-        string? footer = null)
+        string? footer = null
+    )
     {
         InternalCreateEmbed(title, text, url, footer);
         color = EmbedColor.Pending;
@@ -361,15 +383,18 @@ public sealed partial class ResponseBuilder
 
     public ResponseBuilder UserBasedMentions(IGuildUser? permUser = null)
     {
-        sanitizeMentions = !((InternalResolveUser() as IGuildUser ?? permUser)?.GuildPermissions.MentionEveryone ?? false);
+        sanitizeMentions = !(
+            (InternalResolveUser() as IGuildUser ?? permUser)?.GuildPermissions.MentionEveryone
+            ?? false
+        );
         return this;
     }
 
-    private IUser? InternalResolveUser()
-        => ctx?.User ?? user ?? msg?.Author;
+    private IUser? InternalResolveUser() => ctx?.User ?? user ?? msg?.Author;
 
-    public ResponseBuilder Embed(EmbedBuilder eb)
+    public ResponseBuilder Embed(EmbedBuilder eb, [Optional] Color color)
     {
+        eb.Color = color;
         embedBuilder = eb;
         return this;
     }
@@ -443,8 +468,7 @@ public sealed partial class ResponseBuilder
         return this;
     }
 
-    public PaginatedResponseBuilder Paginated()
-        => new(this);
+    public PaginatedResponseBuilder Paginated() => new(this);
 }
 
 public class PaginatedResponseBuilder
@@ -456,28 +480,29 @@ public class PaginatedResponseBuilder
         _builder = builder;
     }
 
-    public SourcedPaginatedResponseBuilder<T> Items<T>(IReadOnlyCollection<T> items)
-        => new SourcedPaginatedResponseBuilder<T>(_builder)
-            .Items(items);
+    public SourcedPaginatedResponseBuilder<T> Items<T>(IReadOnlyCollection<T> items) =>
+        new SourcedPaginatedResponseBuilder<T>(_builder).Items(items);
 
-    public SourcedPaginatedResponseBuilder<T> PageItems<T>(Func<int, Task<IReadOnlyCollection<T>>> items)
-        => new SourcedPaginatedResponseBuilder<T>(_builder)
-            .PageItems(items);
+    public SourcedPaginatedResponseBuilder<T> PageItems<T>(
+        Func<int, Task<IReadOnlyCollection<T>>> items
+    ) => new SourcedPaginatedResponseBuilder<T>(_builder).PageItems(items);
 }
 
 public sealed class SourcedPaginatedResponseBuilder<T> : PaginatedResponseBuilder
 {
     private IReadOnlyCollection<T>? items;
 
-    public Func<IReadOnlyList<T>, int, Task<EmbedBuilder>> PageFunc { get; private set; } = static delegate
-    {
-        return Task.FromResult<EmbedBuilder>(new());
-    };
+    public Func<IReadOnlyList<T>, int, Task<EmbedBuilder>> PageFunc { get; private set; } =
+        static delegate
+        {
+            return Task.FromResult<EmbedBuilder>(new());
+        };
 
-    public Func<int, Task<IReadOnlyCollection<T>>> ItemsFunc { get; set; } = static delegate
-    {
-        return Task.FromResult<IReadOnlyCollection<T>>(ReadOnlyCollection<T>.Empty);
-    };
+    public Func<int, Task<IReadOnlyCollection<T>>> ItemsFunc { get; set; } =
+        static delegate
+        {
+            return Task.FromResult<IReadOnlyCollection<T>>(ReadOnlyCollection<T>.Empty);
+        };
 
     public Func<int, Task<NadekoInteractionBase?>>? InteractionFunc { get; private set; }
 
@@ -489,15 +514,16 @@ public sealed class SourcedPaginatedResponseBuilder<T> : PaginatedResponseBuilde
     public int InitialPage { get; set; }
 
     public SourcedPaginatedResponseBuilder(ResponseBuilder builder)
-        : base(builder)
-    {
-    }
+        : base(builder) { }
 
     public SourcedPaginatedResponseBuilder<T> Items(IReadOnlyCollection<T> col)
     {
         items = col;
         Elems = col.Count;
-        ItemsFunc = (i) => Task.FromResult(items.Skip(i * ItemsPerPage).Take(ItemsPerPage).ToArray() as IReadOnlyCollection<T>);
+        ItemsFunc = (i) =>
+            Task.FromResult(
+                items.Skip(i * ItemsPerPage).Take(ItemsPerPage).ToArray() as IReadOnlyCollection<T>
+            );
         return this;
     }
 
@@ -507,13 +533,14 @@ public sealed class SourcedPaginatedResponseBuilder<T> : PaginatedResponseBuilde
         return this;
     }
 
-    public SourcedPaginatedResponseBuilder<T> PageItems(Func<int, Task<IReadOnlyCollection<T>>> func)
+    public SourcedPaginatedResponseBuilder<T> PageItems(
+        Func<int, Task<IReadOnlyCollection<T>>> func
+    )
     {
         Elems = null;
         ItemsFunc = func;
         return this;
     }
-
 
     public SourcedPaginatedResponseBuilder<T> PageSize(int i)
     {
@@ -527,14 +554,17 @@ public sealed class SourcedPaginatedResponseBuilder<T> : PaginatedResponseBuilde
         return this;
     }
 
-
-    public SourcedPaginatedResponseBuilder<T> Page(Func<IReadOnlyList<T>, int, EmbedBuilder> pageFunc)
+    public SourcedPaginatedResponseBuilder<T> Page(
+        Func<IReadOnlyList<T>, int, EmbedBuilder> pageFunc
+    )
     {
         PageFunc = (xs, x) => Task.FromResult(pageFunc(xs, x));
         return this;
     }
 
-    public SourcedPaginatedResponseBuilder<T> Page(Func<IReadOnlyList<T>, int, Task<EmbedBuilder>> pageFunc)
+    public SourcedPaginatedResponseBuilder<T> Page(
+        Func<IReadOnlyList<T>, int, Task<EmbedBuilder>> pageFunc
+    )
     {
         PageFunc = pageFunc;
         return this;
@@ -552,17 +582,16 @@ public sealed class SourcedPaginatedResponseBuilder<T> : PaginatedResponseBuilde
         return this;
     }
 
-
     public Task SendAsync()
     {
-        var paginationSender = new ResponseBuilder.PaginationSender<T>(
-            this,
-            _builder);
+        var paginationSender = new ResponseBuilder.PaginationSender<T>(this, _builder);
 
         return paginationSender.SendAsync(IsEphemeral);
     }
 
-    public SourcedPaginatedResponseBuilder<T> Interaction(Func<int, Task<NadekoInteractionBase?>> func)
+    public SourcedPaginatedResponseBuilder<T> Interaction(
+        Func<int, Task<NadekoInteractionBase?>> func
+    )
     {
         InteractionFunc = func; //async (i) => await func(i);
         return this;

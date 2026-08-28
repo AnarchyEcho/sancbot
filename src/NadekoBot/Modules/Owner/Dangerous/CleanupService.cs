@@ -4,7 +4,6 @@ using LinqToDB.EntityFrameworkCore;
 using LinqToDB.Mapping;
 using NadekoBot.Common.ModuleBehaviors;
 using NadekoBot.Db.Models;
-using NadekoBot.Modules.Utility.Starboard.Db;
 
 namespace NadekoBot.Modules.Owner.Dangerous;
 
@@ -175,26 +174,6 @@ public sealed class CleanupService : ICleanupService, IReadyExecutor, INService
                  .DeleteAsync();
 
         await ctx.GetTable<ButtonRole>()
-                 .Where(x => !tempTable.Select(x => x.GuildId)
-                                       .Contains(x.GuildId))
-                 .DeleteAsync();
-
-        await ctx.GetTable<StarboardConfig>()
-                 .Where(x => !tempTable.Select(x => x.GuildId)
-                                       .Contains(x.GuildId))
-                 .DeleteAsync();
-
-        await ctx.GetTable<StarboardEntry>()
-                 .Where(x => !tempTable.Select(x => x.GuildId)
-                                       .Contains(x.GuildId))
-                 .DeleteAsync();
-
-        await ctx.GetTable<StarboardIgnoredChannel>()
-                 .Where(x => !tempTable.Select(x => x.GuildId)
-                                       .Contains(x.GuildId))
-                 .DeleteAsync();
-
-        await ctx.GetTable<StarboardMessage>()
                  .Where(x => !tempTable.Select(x => x.GuildId)
                                        .Contains(x.GuildId))
                  .DeleteAsync();

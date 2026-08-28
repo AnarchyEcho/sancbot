@@ -64,16 +64,13 @@ public sealed class AiAgentSession(
 
         var totalToolCalls = 0;
 
-        var useModelList = config.Models is { Count: > 0 };
-        var requestModel = useModelList ? null : config.ModelName;
-        var requestModels = useModelList ? config.Models : null;
-        var requestTools = toolSchemas.Count > 0 ? toolSchemas.ToList() : null;
-
         for (var step = 0; step < config.MaxToolCalls; step++)
         {
             ct.ThrowIfCancellationRequested();
 
-            // Refreshed every step after the first, so the model sees what the bot just posted.
+            // Refresh channel history slot before every request after the first so the
+            // model sees output the bot just posted (e.g. a command's embed) on its way
+            // back into the loop.
             if (step > 0 && historyIndex >= 0 && channelHistoryProvider is not null)
             {
                 var refreshed = channelHistoryProvider();
@@ -89,10 +86,10 @@ public sealed class AiAgentSession(
 
             var request = new AgentChatRequest
             {
-                Model = requestModel,
-                Models = requestModels,
+                Model = config.Models is { Count: > 0 } ? null : config.ModelName,
+                Models = config.Models is { Count: > 0 } ? config.Models : null,
                 Messages = messages,
-                Tools = requestTools,
+                Tools = toolSchemas.Count > 0 ? toolSchemas.ToList() : null,
                 MaxCompletionTokens = config.MaxTokens,
                 Temperature = config.Temperature,
                 ReasoningEffort = reasoningEffort

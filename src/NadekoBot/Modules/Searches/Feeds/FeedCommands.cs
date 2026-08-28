@@ -12,14 +12,18 @@ public partial class Searches
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.ManageMessages)]
         [Priority(1)]
-        public Task YtUploadNotif(string url, [Leftover] string? message = null)
-            => YtUploadNotif(url, null, message);
+        public Task YtUploadNotif(string url, [Leftover] string? message = null) =>
+            YtUploadNotif(url, null, message);
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.ManageMessages)]
         [Priority(2)]
-        public async Task YtUploadNotif(string url, ITextChannel? channel = null, [Leftover] string? message = null)
+        public async Task YtUploadNotif(
+            string url,
+            ITextChannel? channel = null,
+            [Leftover] string? message = null
+        )
         {
             var channelId = await _service.ResolveYtChannelIdAsync(url);
             if (channelId is null)
@@ -33,27 +37,35 @@ public partial class Searches
             if (!((IGuildUser)ctx.User).GetPermissions(channel).MentionEveryone)
                 message = message?.SanitizeAllMentions();
 
-            await Feed($"https://www.youtube.com/feeds/videos.xml?channel_id={channelId}", channel, message);
+            await Feed(
+                $"https://www.youtube.com/feeds/videos.xml?channel_id={channelId}",
+                channel,
+                message
+            );
         }
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.ManageMessages)]
         [Priority(0)]
-        public Task Feed(string url, [Leftover] string? message = null)
-            => Feed(url, null, message);
-
+        public Task Feed(string url, [Leftover] string? message = null) => Feed(url, null, message);
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.ManageMessages)]
         [Priority(1)]
-        public async Task Feed(string url, ITextChannel? channel = null, [Leftover] string? message = null)
+        public async Task Feed(
+            string url,
+            ITextChannel? channel = null,
+            [Leftover] string? message = null
+        )
         {
             await ctx.Channel.TriggerTypingAsync();
-            
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
-                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+
+            if (
+                !Uri.TryCreate(url, UriKind.Absolute, out var uri)
+                || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            )
             {
                 await Response().Error(strs.feed_invalid_url).SendAsync();
                 return;
@@ -129,15 +141,19 @@ public partial class Searches
                 .Items(feeds)
                 .PageSize(10)
                 .CurrentPage(page)
-                .Page((items, cur) =>
-                {
-                    var embed = CreateEmbed().WithOkColor();
-                    var i = 0;
-                    var fs = string.Join("\n",
-                        items.Select(x => $"`{(cur * 10) + ++i}.` <#{x.ChannelId}> {x.Url}"));
+                .Page(
+                    (items, cur) =>
+                    {
+                        var embed = CreateEmbed().WithOkColor();
+                        var i = 0;
+                        var fs = string.Join(
+                            "\n",
+                            items.Select(x => $"`{(cur * 10) + ++i}.` <#{x.ChannelId}> {x.Url}")
+                        );
 
-                    return embed.WithDescription(fs);
-                })
+                        return embed.WithDescription(fs);
+                    }
+                )
                 .SendAsync();
         }
     }

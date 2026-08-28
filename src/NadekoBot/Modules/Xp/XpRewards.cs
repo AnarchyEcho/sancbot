@@ -8,8 +8,7 @@ public partial class Xp
     {
         private readonly ICurrencyProvider _cp;
 
-        public XpRewards(ICurrencyProvider cp)
-            => _cp = cp;
+        public XpRewards(ICurrencyProvider cp) => _cp = cp;
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
@@ -62,10 +61,11 @@ public partial class Xp
 
                     return (x.Level, Text: sign + str);
                 })
-                .Concat(xpSettings.CurrencyRewards
-                    .OrderBy(x => x.Level)
-                    .Select(x => (x.Level,
-                        Format.Bold(x.Amount + _cp.GetCurrencySign()))))
+                .Concat(
+                    xpSettings
+                        .CurrencyRewards.OrderBy(x => x.Level)
+                        .Select(x => (x.Level, Format.Bold(x.Amount + _cp.GetCurrencySign())))
+                )
                 .GroupBy(x => x.Level)
                 .OrderBy(x => x.Key)
                 .ToList();
@@ -75,21 +75,27 @@ public partial class Xp
                 .Items(allRewards)
                 .PageSize(9)
                 .CurrentPage(page)
-                .Page((items, _) =>
-                {
-                    var embed = CreateEmbed().WithTitle(GetText(strs.level_up_rewards)).WithOkColor();
-
-                    if (!items.Any())
-                        return embed.WithDescription(GetText(strs.no_level_up_rewards));
-
-                    foreach (var reward in items)
+                .Page(
+                    (items, _) =>
                     {
-                        embed.AddField(GetText(strs.level_x(reward.Key)),
-                            string.Join("\n", reward.Select(y => y.Item2)));
-                    }
+                        var embed = CreateEmbed()
+                            .WithTitle(GetText(strs.level_up_rewards))
+                            .WithOkColor();
 
-                    return embed;
-                })
+                        if (!items.Any())
+                            return embed.WithDescription(GetText(strs.no_level_up_rewards));
+
+                        foreach (var reward in items)
+                        {
+                            embed.AddField(
+                                GetText(strs.level_x(reward.Key)),
+                                string.Join("\n", reward.Select(y => y.Item2))
+                            );
+                        }
+
+                        return embed;
+                    }
+                )
                 .SendAsync();
         }
 
@@ -98,9 +104,9 @@ public partial class Xp
         [BotPerm(GuildPerm.ManageRoles)]
         [RequireContext(ContextType.Guild)]
         [Priority(2)]
-        public async Task XpRoleReward(int level)
+        public async Task XpRoleReward(int level, bool remove = false)
         {
-            await _service.ResetRoleRewardAsync(ctx.Guild.Id, level);
+            await _service.ResetRoleRewardAsync(ctx.Guild.Id, level, remove);
             await Response().Confirm(strs.xp_role_reward_cleared(level)).SendAsync();
         }
 
@@ -114,16 +120,27 @@ public partial class Xp
             if (level < 1)
                 return;
 
-            await _service.SetRoleRewardAsync(ctx.Guild.Id, level, role.Id, action == AddRemove.Remove);
+            await _service.SetRoleRewardAsync(
+                ctx.Guild.Id,
+                level,
+                role.Id,
+                action == AddRemove.Remove
+            );
             if (action == AddRemove.Add)
             {
-                await Response().Confirm(strs.xp_role_reward_add_role(level, Format.Bold(role.ToString()))).SendAsync();
+                await Response()
+                    .Confirm(strs.xp_role_reward_add_role(level, Format.Bold(role.ToString())))
+                    .SendAsync();
             }
             else
             {
                 await Response()
-                    .Confirm(strs.xp_role_reward_remove_role(Format.Bold(level.ToString()),
-                        Format.Bold(role.ToString())))
+                    .Confirm(
+                        strs.xp_role_reward_remove_role(
+                            Format.Bold(level.ToString()),
+                            Format.Bold(role.ToString())
+                        )
+                    )
                     .SendAsync();
             }
         }
@@ -139,13 +156,16 @@ public partial class Xp
             await _service.SetCurrencyReward(ctx.Guild.Id, level, amount);
             if (amount == 0)
             {
-                await Response().Confirm(strs.cur_reward_cleared(level, _cp.GetCurrencySign())).SendAsync();
+                await Response()
+                    .Confirm(strs.cur_reward_cleared(level, _cp.GetCurrencySign()))
+                    .SendAsync();
             }
             else
             {
                 await Response()
-                    .Confirm(strs.cur_reward_added(level,
-                        Format.Bold(amount + _cp.GetCurrencySign())))
+                    .Confirm(
+                        strs.cur_reward_added(level, Format.Bold(amount + _cp.GetCurrencySign()))
+                    )
                     .SendAsync();
             }
         }

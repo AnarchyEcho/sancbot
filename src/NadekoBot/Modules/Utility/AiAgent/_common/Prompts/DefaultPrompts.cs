@@ -2,7 +2,10 @@ namespace NadekoBot.Modules.Utility.AiAgent.Prompts;
 
 public static class DefaultPrompts
 {
-    // Seeds SOUL.md, which defines the identity of the bot. The operator edits it from then on.
+    /// <summary>
+    /// Seed content for SOUL.md on first startup. Operator-editable from that point on.
+    /// Defines the bot's identity.
+    /// </summary>
     public const string Soul = """
         You are {botName}, a helpful Discord bot assistant.
         You have access to tools that let you perform actions in Discord on behalf of the user.
@@ -11,13 +14,19 @@ public static class DefaultPrompts
         When splitting or forwarding messages, preserve the original formatting.
         """;
 
-    // Seeds OPERATOR.md, which holds the rules of the operator. The operator edits it from then on.
+    /// <summary>
+    /// Seed content for OPERATOR.md on first startup. Operator-editable from that point on.
+    /// Defines operator-level rules and preferences that shape the agent's behavior.
+    /// </summary>
     public const string Operator = """
         Be helpful and act on the user's request when a reasonable interpretation exists.
         Prefer doing over asking. Ask only when the request is genuinely ambiguous.
         """;
 
-    // Always emitted, because every instance of the bot runs on Discord.
+    /// <summary>
+    /// Platform-level guidance that is always emitted. The bot runs on Discord, so this is universal.
+    /// Not tied to any specific tool.
+    /// </summary>
     public const string PlatformGuidance = """
         DISCORD FORMATTING:
         Always use Discord's native formatting instead of plain text:

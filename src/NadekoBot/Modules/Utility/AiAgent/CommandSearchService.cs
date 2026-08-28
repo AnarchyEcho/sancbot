@@ -21,7 +21,9 @@ public sealed class CommandSearchService(
 
     private static readonly TypedKey<bool> _reloadKey = new("cmdsearch.reload");
 
-    // Bumped when the parsing changes but the file does not, to invalidate the cache once.
+    // Bump when the parsed representation changes without the on-disk file changing,
+    // so the embeddings cache (keyed by this hash) is invalidated once. "v2" = prefix
+    // stripped from aliases/usage at parse time.
     private static readonly byte[] _indexSchemaSalt = "v2-prefixless"u8.ToArray();
 
     private readonly SemanticIndex<CommandEntry> _index = new(
@@ -274,7 +276,8 @@ public sealed class CommandSearchService(
         }
     }
 
-    // The salt is part of the hash, so a change of the parsing alone also invalidates the cache.
+    // Hash of the file bytes plus a schema salt, so a change in how we parse the file
+    // (without the file itself changing) invalidates the embeddings cache once.
     private static byte[] ComputeListHashInternal(byte[] cmdListBytes)
     {
         using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -283,8 +286,10 @@ public sealed class CommandSearchService(
         return hasher.GetHashAndReset();
     }
 
-    // run_command applies the prefix of the guild, so only the leading one is stripped here.
-    // An interior prefix, as in ".doas @x .give", is an argument and stays.
+    // The persisted commandlist.json bakes in CommandListGenerator.DefaultPrefix so it
+    // stays a stable prefixed source for external consumers. The agent works with raw
+    // commands (run_command re-applies the guild's prefix), so strip the single leading
+    // prefix here. Interior prefixes (e.g. ".doas @x .give") are arguments and preserved.
     private static string StripLeadingPrefixInternal(string s)
         => s.StartsWith(CommandListGenerator.DefaultPrefix, StringComparison.Ordinal)
             ? s[CommandListGenerator.DefaultPrefix.Length..]

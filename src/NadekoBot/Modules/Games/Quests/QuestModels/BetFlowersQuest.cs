@@ -2,28 +2,24 @@
 
 public sealed class BetFlowersQuest : IQuest
 {
-    public QuestIds QuestId
-        => QuestIds.BetFlowers;
+    public QuestIds QuestId => QuestIds.BetFlowers;
 
-    public string Name
-        => "Flower Gambler";
+    public string Name => "Cookies Gambler";
 
-    public string Desc
-        => "Bet 300 flowers";
+    public string Desc => "Bet 300 cookies";
 
-    public string ProgDesc
-        => "flowers bet";
+    public string ProgDesc => "flowers bet";
 
-    public QuestEventType EventType
-        => QuestEventType.BetPlaced;
+    public QuestEventType EventType => QuestEventType.BetPlaced;
 
-    public long RequiredAmount
-        => 300;
+    public long RequiredAmount => 300;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {
-        if (!metadata.TryGetValue("amount", out var amountStr)
-            || !long.TryParse(amountStr, out var amount))
+        if (
+            !metadata.TryGetValue("amount", out var amountStr)
+            || !long.TryParse(amountStr, out var amount)
+        )
             return oldProgress;
 
         return oldProgress + amount;

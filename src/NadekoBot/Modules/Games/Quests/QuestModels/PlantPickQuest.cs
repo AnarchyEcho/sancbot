@@ -2,23 +2,17 @@
 
 public sealed class PlantPickQuest : IQuest
 {
-    public QuestIds QuestId
-        => QuestIds.PlantPick;
+    public QuestIds QuestId => QuestIds.PlantPick;
 
-    public string Name
-        => "Gardener";
+    public string Name => "Gardener";
 
-    public string Desc
-        => "pick and plant";
+    public string Desc => "pick and plant";
 
-    public string ProgDesc
-        => "";
+    public string ProgDesc => "";
 
-    public QuestEventType EventType
-        => QuestEventType.PlantOrPick;
+    public QuestEventType EventType => QuestEventType.PlantOrPick;
 
-    public long RequiredAmount
-        => 0b11;
+    public long RequiredAmount => 0b11;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {
@@ -48,13 +42,13 @@ public sealed class PlantPickQuest : IQuest
         if ((progress & 0b01) == 0b01)
             emoji = IQuest.COMPLETED;
 
-        msg += emoji + " picked flowers\n";
+        msg += emoji + " picked cookies\n";
 
         emoji = IQuest.INCOMPLETE;
         if ((progress & 0b10) == 0b10)
             emoji = IQuest.COMPLETED;
 
-        msg += emoji + " planted flowers";
+        msg += emoji + " planted cookies";
 
         return msg;
     }

@@ -1,10 +1,10 @@
 ﻿#nullable disable
+using LinqToDB.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using NadekoBot.Modules.Gambling.Common;
-using NadekoBot.Modules.Gambling.Services;
 using NadekoBot.Db.Models;
 using NadekoBot.Modules.Administration;
-using LinqToDB.EntityFrameworkCore;
+using NadekoBot.Modules.Gambling.Common;
+using NadekoBot.Modules.Gambling.Services;
 
 namespace NadekoBot.Modules.Gambling;
 
@@ -15,18 +15,18 @@ public partial class Gambling
     {
         public enum List
         {
-            List
+            List,
         }
 
         public enum Role
         {
-            Role
+            Role,
         }
 
         public enum Command
         {
             Command,
-            Cmd
+            Cmd,
         }
 
         private readonly DbService _db;
@@ -53,27 +53,33 @@ public partial class Gambling
                 .ToListAsyncEF();
 
             await Response()
-                   .Paginated()
-                   .Items(entries.ToList())
-                   .PageSize(9)
-                   .CurrentPage(page)
-                   .Page((items, curPage) =>
-                   {
-                       if (!items.Any())
-                           return CreateEmbed().WithErrorColor().WithDescription(GetText(strs.shop_none));
-                       var embed = CreateEmbed().WithOkColor().WithTitle(GetText(strs.shop));
+                .Paginated()
+                .Items(entries.ToList())
+                .PageSize(9)
+                .CurrentPage(page)
+                .Page(
+                    (items, curPage) =>
+                    {
+                        if (!items.Any())
+                            return CreateEmbed()
+                                .WithErrorColor()
+                                .WithDescription(GetText(strs.shop_none));
+                        var embed = CreateEmbed().WithOkColor().WithDescription(GetText(strs.shop));
 
-                       for (var i = 0; i < items.Count; i++)
-                       {
-                           var entry = items[i];
-                           embed.AddField($"#{(curPage * 9) + i + 1} - {N(entry.Price)}",
-                               EntryToString(entry),
-                               true);
-                       }
+                        for (var i = 0; i < items.Count; i++)
+                        {
+                            var entry = items[i];
+                            embed.AddField(
+                                $"#{(curPage * 9) + i + 1} - {N(entry.Price)} - {entry.Name}",
+                                EntryToString(entry),
+                                true
+                            );
+                        }
 
-                       return embed;
-                   })
-                   .SendAsync();
+                        return embed;
+                    }
+                )
+                .SendAsync();
         }
 
         [Cmd]
@@ -104,7 +110,6 @@ public partial class Gambling
                     .FirstOrDefaultAsync();
             }
 
-
             if (entry is null)
             {
                 await Response().Error(strs.shop_item_not_found).SendAsync();
@@ -124,8 +129,8 @@ public partial class Gambling
                 if (!guser.RoleIds.Contains(reqRoleId))
                 {
                     await Response()
-                          .Error(strs.shop_item_req_role_unfulfilled(Format.Bold(role.ToString())))
-                          .SendAsync();
+                        .Error(strs.shop_item_req_role_unfulfilled(Format.Bold(role.ToString())))
+                        .SendAsync();
                     return;
                 }
             }
@@ -147,7 +152,13 @@ public partial class Gambling
                     return;
                 }
 
-                if (await _cs.RemoveAsync(ctx.User.Id, entry.Price, new("shop", "buy", entry.Type.ToString())))
+                if (
+                    await _cs.RemoveAsync(
+                        ctx.User.Id,
+                        entry.Price,
+                        new("shop", "buy", entry.Type.ToString())
+                    )
+                )
                 {
                     try
                     {
@@ -162,16 +173,25 @@ public partial class Gambling
                     }
 
                     var profit = GetProfitAmount(entry.Price);
-                    await _cs.AddAsync(entry.AuthorId, profit, new("shop", "sell", $"Shop sell item - {entry.Type}"));
-                    await _cs.AddAsync(ctx.Client.CurrentUser.Id, entry.Price - profit, new("shop", "cut"));
-                    await Response().Confirm(strs.shop_role_purchase(Format.Bold(role.Name))).SendAsync();
+                    await _cs.AddAsync(
+                        entry.AuthorId,
+                        profit,
+                        new("shop", "sell", $"Shop sell item - {entry.Type}")
+                    );
+                    await _cs.AddAsync(
+                        ctx.Client.CurrentUser.Id,
+                        entry.Price - profit,
+                        new("shop", "cut")
+                    );
+                    await Response()
+                        .Confirm(strs.shop_role_purchase(Format.Bold(role.Name)))
+                        .SendAsync();
                     return;
                 }
 
                 await Response().Error(strs.not_enough(CurrencySign)).SendAsync();
                 return;
             }
-
             else if (entry.Type == ShopEntryType.List)
             {
                 if (entry.Items.Count == 0)
@@ -182,7 +202,13 @@ public partial class Gambling
 
                 var item = entry.Items.ToArray()[_rng.Next(0, entry.Items.Count)];
 
-                if (await _cs.RemoveAsync(ctx.User.Id, entry.Price, new("shop", "buy", entry.Type.ToString())))
+                if (
+                    await _cs.RemoveAsync(
+                        ctx.User.Id,
+                        entry.Price,
+                        new("shop", "buy", entry.Type.ToString())
+                    )
+                )
                 {
                     await using (var uow = _db.GetDbContext())
                     {
@@ -193,28 +219,38 @@ public partial class Gambling
                     try
                     {
                         await Response()
-                              .User(ctx.User)
-                              .Embed(CreateEmbed()
-                                     .WithOkColor()
-                                     .WithTitle(GetText(strs.shop_purchase(ctx.Guild.Name)))
-                                     .AddField(GetText(strs.item), item.Text)
-                                     .AddField(GetText(strs.price), entry.Price.ToString(), true)
-                                     .AddField(GetText(strs.name), entry.Name, true))
-                              .SendAsync();
+                            .User(ctx.User)
+                            .Embed(
+                                CreateEmbed()
+                                    .WithOkColor()
+                                    .WithTitle(GetText(strs.shop_purchase(ctx.Guild.Name)))
+                                    .AddField(GetText(strs.item), item.Text)
+                                    .AddField(GetText(strs.price), entry.Price.ToString(), true)
+                                    .AddField(GetText(strs.name), entry.Name, true)
+                            )
+                            .SendAsync();
 
-                        await _cs.AddAsync(entry.AuthorId,
+                        await _cs.AddAsync(
+                            entry.AuthorId,
                             GetProfitAmount(entry.Price),
-                            new("shop", "sell", entry.Name));
+                            new("shop", "sell", entry.Name)
+                        );
                     }
                     catch
                     {
-                        await _cs.AddAsync(ctx.User.Id, entry.Price, new("shop", "error-refund", entry.Name));
+                        await _cs.AddAsync(
+                            ctx.User.Id,
+                            entry.Price,
+                            new("shop", "error-refund", entry.Name)
+                        );
                         await using (var uow = _db.GetDbContext())
                         {
-                            var entries = new IndexedCollection<ShopEntry>(await uow.Set<ShopEntry>()
-                                                                                  .Where(x => x.GuildId == ctx.Guild.Id)
-                                                                                  .Include(x => x.Items)
-                                                                                  .ToListAsyncEF());
+                            var entries = new IndexedCollection<ShopEntry>(
+                                await uow.Set<ShopEntry>()
+                                    .Where(x => x.GuildId == ctx.Guild.Id)
+                                    .Include(x => x.Items)
+                                    .ToListAsyncEF()
+                            );
                             entry = entries.ElementAtOrDefault(index);
                             if (entry is not null)
                             {
@@ -247,7 +283,13 @@ public partial class Gambling
                     return;
                 }
 
-                if (!await _cs.RemoveAsync(ctx.User.Id, entry.Price, new("shop", "buy", entry.Type.ToString())))
+                if (
+                    !await _cs.RemoveAsync(
+                        ctx.User.Id,
+                        entry.Price,
+                        new("shop", "buy", entry.Type.ToString())
+                    )
+                )
                 {
                     await Response().Error(strs.not_enough(CurrencySign)).SendAsync();
                     return;
@@ -255,51 +297,49 @@ public partial class Gambling
                 else
                 {
                     var buyer = (IGuildUser)ctx.User;
-                    var cmd = entry.Command
-                                   .Replace("%you%", buyer.Mention)
-                                   .Replace("%you.mention%", buyer.Mention)
-                                   .Replace("%you.username%", buyer.Username)
-                                   .Replace("%you.name%", buyer.GlobalName ?? buyer.Username)
-                                   .Replace("%you.nick%", buyer.DisplayName);
+                    var cmd = entry
+                        .Command.Replace("%you%", buyer.Mention)
+                        .Replace("%you.mention%", buyer.Mention)
+                        .Replace("%you.username%", buyer.Username)
+                        .Replace("%you.name%", buyer.GlobalName ?? buyer.Username)
+                        .Replace("%you.nick%", buyer.DisplayName);
 
                     var eb = CreateEmbed()
-                             .WithPendingColor()
-                             .WithTitle("Executing shop command")
-                             .WithDescription(cmd);
+                        .WithPendingColor()
+                        .WithTitle("Executing shop command")
+                        .WithDescription(cmd);
 
                     var msgTask = Response().Embed(eb).SendAsync();
 
-                    await _cs.AddAsync(entry.AuthorId,
+                    await _cs.AddAsync(
+                        entry.AuthorId,
                         GetProfitAmount(entry.Price),
-                        new("shop", "sell", entry.Name));
+                        new("shop", "sell", entry.Name)
+                    );
 
                     await Task.Delay(250);
-                    await _cmdHandler.TryRunCommand(guild,
+                    await _cmdHandler.TryRunCommand(
+                        guild,
                         channel,
-                        new DoAsUserMessage(
-                            msg,
-                            user,
-                            cmd
-                        ));
+                        new DoAsUserMessage(msg, user, cmd)
+                    );
 
                     try
                     {
                         var pendingMsg = await msgTask;
                         await pendingMsg.EditAsync(
-                            SmartEmbedTextArray.FromEmbed(eb
-                                                          .WithOkColor()
-                                                          .WithTitle("Shop command executed")
-                                                          .Build()));
+                            SmartEmbedTextArray.FromEmbed(
+                                eb.WithOkColor().WithTitle("Shop command executed").Build()
+                            )
+                        );
                     }
-                    catch
-                    {
-                    }
+                    catch { }
                 }
             }
         }
 
-        private long GetProfitAmount(int price)
-            => (int)Math.Ceiling((1.0m - Config.BotCuts.ShopSaleCut) * price);
+        private long GetProfitAmount(int price) =>
+            (int)Math.Ceiling((1.0m - Config.BotCuts.ShopSaleCut) * price);
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
@@ -310,9 +350,16 @@ public partial class Gambling
             if (price < 1)
                 return;
 
-            var entry = await _service.AddShopCommandAsync(ctx.Guild.Id, ctx.User.Id, price, command);
+            var entry = await _service.AddShopCommandAsync(
+                ctx.Guild.Id,
+                ctx.User.Id,
+                price,
+                command
+            );
 
-            await Response().Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add))).SendAsync();
+            await Response()
+                .Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add)))
+                .SendAsync();
         }
 
         [Cmd]
@@ -336,17 +383,21 @@ public partial class Gambling
             };
             await using (var uow = _db.GetDbContext())
             {
-                var entries = new IndexedCollection<ShopEntry>(await uow.Set<ShopEntry>()
-                    .Where(x => x.GuildId == ctx.Guild.Id)
-                    .Include(x => x.Items)
-                    .ToListAsyncEF());
+                var entries = new IndexedCollection<ShopEntry>(
+                    await uow.Set<ShopEntry>()
+                        .Where(x => x.GuildId == ctx.Guild.Id)
+                        .Include(x => x.Items)
+                        .ToListAsyncEF()
+                );
 
                 entries.Add(entry);
                 uow.Add(entry);
                 await uow.SaveChangesAsync();
             }
 
-            await Response().Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add))).SendAsync();
+            await Response()
+                .Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add)))
+                .SendAsync();
         }
 
         [Cmd]
@@ -364,7 +415,7 @@ public partial class Gambling
                 Type = ShopEntryType.List,
                 AuthorId = ctx.User.Id,
                 Items = new(),
-                GuildId = ctx.Guild.Id
+                GuildId = ctx.Guild.Id,
             };
             await using (var uow = _db.GetDbContext())
             {
@@ -377,10 +428,11 @@ public partial class Gambling
 
                 uow.Add(entry);
                 await uow.SaveChangesAsync();
-
             }
 
-            await Response().Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add))).SendAsync();
+            await Response()
+                .Embed(EntryToEmbed(entry).WithTitle(GetText(strs.shop_item_add)))
+                .SendAsync();
         }
 
         [Cmd]
@@ -391,10 +443,7 @@ public partial class Gambling
             index -= 1;
             if (index < 0)
                 return;
-            var item = new ShopEntryItem
-            {
-                Text = itemText
-            };
+            var item = new ShopEntryItem { Text = itemText };
             ShopEntry entry;
             var rightType = false;
             var added = false;
@@ -456,7 +505,9 @@ public partial class Gambling
             if (removed is null)
                 await Response().Error(strs.shop_item_not_found).SendAsync();
             else
-                await Response().Embed(EntryToEmbed(removed).WithTitle(GetText(strs.shop_item_rm))).SendAsync();
+                await Response()
+                    .Embed(EntryToEmbed(removed).WithTitle(GetText(strs.shop_item_rm)))
+                    .SendAsync();
         }
 
         [Cmd]
@@ -539,7 +590,11 @@ public partial class Gambling
             if (--itemIndex < 0)
                 return;
 
-            var succ = await _service.SetItemRoleRequirementAsync(ctx.Guild.Id, itemIndex, role?.Id);
+            var succ = await _service.SetItemRoleRequirementAsync(
+                ctx.Guild.Id,
+                itemIndex,
+                role?.Id
+            );
             if (!succ)
             {
                 await Response().Error(strs.shop_item_not_found).SendAsync();
@@ -558,34 +613,47 @@ public partial class Gambling
 
             if (entry.Type == ShopEntryType.Role)
             {
+                var roleDisplayName =
+                    !string.IsNullOrWhiteSpace(entry.Name) && entry.Name != "-"
+                        ? entry.Name
+                        : ctx.Guild.GetRole(entry.RoleId)?.Name ?? "MISSING_ROLE";
+
                 return embed
-                       .AddField(GetText(strs.name),
-                           GetText(strs.shop_role(Format.Bold(ctx.Guild.GetRole(entry.RoleId)?.Name
-                                                              ?? "MISSING_ROLE"))),
-                           true)
-                       .AddField(GetText(strs.price), N(entry.Price), true)
-                       .AddField(GetText(strs.type), entry.Type.ToString(), true);
+                    .AddField(
+                        GetText(strs.name),
+                        GetText(strs.shop_role(Format.Bold(roleDisplayName))),
+                        true
+                    )
+                    .AddField(GetText(strs.price), N(entry.Price), true)
+                    .AddField(GetText(strs.type), entry.Type.ToString(), true);
             }
 
             if (entry.Type == ShopEntryType.List)
             {
-                return embed.AddField(GetText(strs.name), entry.Name, true)
-                            .AddField(GetText(strs.price), N(entry.Price), true)
-                            .AddField(GetText(strs.type), GetText(strs.random_unique_item), true);
+                return embed
+                    .AddField(GetText(strs.name), entry.Name, true)
+                    .AddField(GetText(strs.price), N(entry.Price), true)
+                    .AddField(GetText(strs.type), GetText(strs.random_unique_item), true);
             }
-
             else if (entry.Type == ShopEntryType.Command)
             {
                 return embed
-                       .AddField(GetText(strs.name), Format.Code(entry.Command), true)
-                       .AddField(GetText(strs.price), N(entry.Price), true)
-                       .AddField(GetText(strs.type), entry.Type.ToString(), true);
+                    .AddField(GetText(strs.name), Format.Code(entry.Command), true)
+                    .AddField(GetText(strs.price), N(entry.Price), true)
+                    .AddField(GetText(strs.type), entry.Type.ToString(), true);
             }
 
-            //else if (entry.Type == ShopEntryType.Infinite_List)
-            //    return embed.AddField(GetText(strs.name), GetText(strs.shop_role(Format.Bold(entry.RoleName)), true))
-            //            .AddField(GetText(strs.price), entry.Price.ToString(), true)
-            //            .AddField(GetText(strs.type), entry.Type.ToString(), true);
+            // else if (entry.Type == ShopEntryType.Infinite_List)
+            //     return embed.AddField(GetText(strs.name), GetText(strs.shop_role(Format.Bold(entry.RoleName)), true))
+            //             .AddField(GetText(strs.price), entry.Price.ToString(), true)
+            //             .AddField(GetText(strs.type), entry.Type.ToString(), true);
+            //  return null;
+            //  }
+            //
+            // else if (entry.Type == ShopEntryType.Infinite_List)
+            // return embed.AddField(GetText(strs.name), GetText(strs.shop_role(Format.Bold(entry.RoleName)), true))
+            //         .AddField(GetText(strs.price), entry.Price.ToString(), true)
+            //         .AddField(GetText(strs.type), entry.Type.ToString(), true);
             return null;
         }
 
@@ -593,14 +661,23 @@ public partial class Gambling
         {
             var prepend = string.Empty;
             if (entry.RoleRequirement is not null)
-                prepend = Format.Italics(GetText(strs.shop_item_requires_role($"<@&{entry.RoleRequirement}>")))
-                          + Environment.NewLine;
+                prepend =
+                    Format.Italics(
+                        GetText(strs.shop_item_requires_role($"<@&{entry.RoleRequirement}>"))
+                    ) + Environment.NewLine;
 
             if (entry.Type == ShopEntryType.Role)
                 return prepend
-                       + GetText(strs.shop_role(Format.Bold(ctx.Guild.GetRole(entry.RoleId)?.Name ?? "MISSING_ROLE")));
+                    + GetText(
+                        strs.shop_role(
+                            Format.Bold(ctx.Guild.GetRole(entry.RoleId)?.Name ?? "MISSING_ROLE")
+                        )
+                    );
             if (entry.Type == ShopEntryType.List)
-                return prepend + GetText(strs.unique_items_left(entry.Items.Count)) + "\n" + entry.Name;
+                return prepend
+                    + GetText(strs.unique_items_left(entry.Items.Count))
+                    + "\n"
+                    + entry.Name;
 
             if (entry.Type == ShopEntryType.Command)
                 return prepend + Format.Code(entry.Command);

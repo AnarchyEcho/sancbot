@@ -2,23 +2,17 @@
 
 public sealed class CheckLeaderboardsQuest : IQuest
 {
-    public QuestIds QuestId
-        => QuestIds.CheckBetting;
+    public QuestIds QuestId => QuestIds.CheckBetting;
 
-    public string Name
-        => "Leaderboard Enthusiast";
+    public string Name => "Leaderboard Enthusiast";
 
-    public string Desc
-        => "Check lb, xplb, fishlb and waifulb";
+    public string Desc => "Check lb, xplb, fishlb";
 
-    public string ProgDesc
-        => "";
+    public string ProgDesc => "";
 
-    public QuestEventType EventType
-        => QuestEventType.CommandUsed;
+    public QuestEventType EventType => QuestEventType.CommandUsed;
 
-    public long RequiredAmount
-        => 0b1111;
+    public long RequiredAmount => 0b1011;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {
@@ -31,8 +25,8 @@ public sealed class CheckLeaderboardsQuest : IQuest
             progress |= 0b0001;
         else if (name == "xpleaderboard")
             progress |= 0b0010;
-        else if (name == "waifuleaderboard")
-            progress |= 0b0100;
+        // else if (name == "waifuleaderboard")
+        //     progress |= 0b0100;
         else if (name == "fishlb")
             progress |= 0b1000;
 
@@ -47,26 +41,26 @@ public sealed class CheckLeaderboardsQuest : IQuest
         if ((progress & 0b0001) == 0b0001)
             emoji = IQuest.COMPLETED;
 
-        msg += emoji + " flower lb seen\n";
+        msg += emoji + " cookies lb seen\n";
 
         emoji = IQuest.INCOMPLETE;
         if ((progress & 0b0010) == 0b0010)
             emoji = IQuest.COMPLETED;
-            
+
         msg += emoji + " xp lb seen\n";
-        
-        emoji = IQuest.INCOMPLETE;
-        if ((progress & 0b0100) == 0b0100)
-            emoji = IQuest.COMPLETED;
-            
-        msg += emoji + " waifu lb seen";
-        
+
+        // emoji = IQuest.INCOMPLETE;
+        // if ((progress & 0b0100) == 0b0100)
+        //     emoji = IQuest.COMPLETED;
+        //
+        // msg += emoji + " waifu lb seen";
+
         emoji = IQuest.INCOMPLETE;
         if ((progress & 0b1000) == 0b1000)
             emoji = IQuest.COMPLETED;
-            
+
         msg += "\n" + emoji + " fish lb seen";
-        
+
         return msg;
     }
 }

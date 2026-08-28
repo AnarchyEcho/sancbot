@@ -2,24 +2,41 @@ using System.Text.Json;
 
 namespace NadekoBot.Modules.Utility.AiAgent;
 
-// One action the agent can invoke during a ReAct loop.
+/// <summary>
+/// A discrete action that the AI agent can invoke during a ReAct loop.
+/// Each tool declares its OpenAI-compatible schema and executes within a permission-scoped context.
+/// </summary>
 public interface IAiTool
 {
-    // Exposed to the LLM, for example "send_message".
+    /// <summary>
+    /// Tool name exposed to the LLM (e.g. "send_message", "get_message")
+    /// </summary>
     string Name { get; }
 
-    // Tells the LLM when to use the tool.
+    /// <summary>
+    /// Human-readable description sent to the LLM so it understands when to use this tool
+    /// </summary>
     string Description { get; }
 
-    // OpenAI function-calling format.
+    /// <summary>
+    /// JSON Schema describing the parameters object for this tool (OpenAI function-calling format)
+    /// </summary>
     JsonElement ParameterSchema { get; }
 
-    // True for a tool which search_data_tools discovers, false for a tool which is always loaded.
+    /// <summary>
+    /// Whether this is a data tool discovered via search_data_tools (true) or a core tool always loaded (false)
+    /// </summary>
     bool IsDataTool => false;
 
-    // Lives with the tool, so it can never drift from what the tool does.
+    /// <summary>
+    /// Optional system prompt guidance for the LLM on when and how to use this tool.
+    /// Collected by SystemPromptBuilder and emitted in the TOOL USAGE slot.
+    /// Tool guidance lives with the tool so it can never drift from the tool's actual behavior.
+    /// </summary>
     string? SystemGuidance => null;
 
-    // The result string goes back to the LLM.
+    /// <summary>
+    /// Execute the tool and return a result string that will be fed back to the LLM
+    /// </summary>
     Task<string> ExecuteAsync(AiToolContext context, JsonElement arguments);
 }
