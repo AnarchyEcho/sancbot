@@ -8402,22 +8402,6 @@
     },
     {
       "Aliases": [
-        ".starboard",
-        ".sboard"
-      ],
-      "Description": "Makes the current channel the starboard and opens the setup panel.\nThe bot copies messages which get enough star reactions to the starboard.\nThe most starred message stays at the top of the channel.\nA message stays on the starboard even if the original message is deleted.\nThe star reaction can be a custom emote.\nThe panel sets how many messages the starboard shows, from 10 to 100.",
-      "Usage": [
-        ".starboard"
-      ],
-      "Submodule": "StarboardCommands",
-      "Module": "Utility",
-      "Options": null,
-      "Requirements": [
-        "ManageServer Server Permission"
-      ]
-    },
-    {
-      "Aliases": [
         ".streamrole"
       ],
       "Description": "Sets a role which is monitored for streamers (FromRole), and a role to add if a user from 'FromRole' is streaming (AddRole). When a user from 'FromRole' starts streaming, they will receive an 'AddRole'. You can only have 1 Stream Role per server. Provide no parameters to disable.",
@@ -8823,6 +8807,24 @@
       "Module": "Utility",
       "Options": null,
       "Requirements": []
+    }
+  ],
+  "verification": [
+    {
+      "Aliases": [
+        ".verifycreate",
+        ".vfycreate"
+      ],
+      "Description": "",
+      "Usage": [
+        ".verifycreate"
+      ],
+      "Submodule": "verification",
+      "Module": "verification",
+      "Options": null,
+      "Requirements": [
+        "Bot Owner Only"
+      ]
     }
   ],
   "Waifus": [
