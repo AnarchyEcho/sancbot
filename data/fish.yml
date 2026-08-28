@@ -1,0 +1,990 @@
+# DO NOT CHANGE THE VERSION MANUALLY
+version: 12
+weatherSeed: w%29';^eGE)9oWHM(aI9I;%1[.r^z2ZS7ShV,l')o(e%#"hVzb>oxQq^`.&/7srh
+requireCaptcha: false
+starEmojis:
+  - ⚫
+  - ⭐
+  - ⭐
+  - ⭐
+  - ⭐
+spotEmojis:
+  - "🌊"
+  - "🚣"
+  - "🏞️"
+  - "🐸"
+  - "🪸"
+chance:
+  fish: 80
+  trash: 15
+  nothing: 4
+  currency: 2
+# Min currency awarded when fishing out currency.
+currencyMin: 25
+# Max currency awarded when fishing out currency.
+currencyMax: 75
+fish:
+  - id: 1
+    name: Alligator
+    weather: 
+    spot: 
+    time: 
+    chance: 1
+    stars: 4
+    fluff: A massive apex predator that definitely didn't appreciate being reeled in.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Alligator.png?ec158e&format=original
+    emoji: "🐊"
+  - id: 2
+    name: Axolotl
+    weather: 
+    spot: 
+    time: 
+    chance: 1
+    stars: 4
+    fluff: Perfectly content to just sit there and smile at you.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Axolotl.png?ec158e&format=original
+    emoji: "🦎"
+  - id: 3
+    name: Largemouth Bass
+    weather: 
+    spot: River
+    time: Day
+    chance: 8
+    stars: 4
+    fluff: The classic catch. Always puts up a respectable little fight.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Largemouth_Bass.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 4
+    name: Bluegill
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 3
+    stars: 4
+    fluff: Vibrant and colorful, though mostly famous for stealing bait.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Bluegill.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 5
+    name: Bowfin
+    weather: Rain
+    spot: River
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: An ancient survivor of murky river depths.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Bowfin.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 6
+    name: Bull Shark
+    weather: 
+    spot: 
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: How did a shark even make its way into the freshwater system?!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Bull_Shark.png?ec158e&format=original
+    emoji: "🦈"
+  - id: 7
+    name: Carp
+    weather: 
+    spot: River
+    time: 
+    chance: 5
+    stars: 4
+    fluff: Heavy, slow, and surprisingly difficult to wrangle ashore.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Carp.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 8
+    name: Catfish
+    weather: Rain
+    spot: River
+    time: Night
+    chance: 8
+    stars: 4
+    fluff: Has impressive whiskers and a total refusal to stay still.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Catfish.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 9
+    name: Crab
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 1
+    stars: 4
+    fluff: Pinches first and asks questions never.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Crab.png?ec158e&format=original
+    emoji: "🦀"
+  - id: 10
+    name: Crappie
+    weather: 
+    spot: River
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Unfortunate name, but actually a very fine fish.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Crappie.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 11
+    name: Crayfish
+    weather: Rain
+    spot: River
+    time: Night
+    chance: 1
+    stars: 4
+    fluff: Looks like a pocket-sized lobster with a huge attitude.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Crayfish.png?ec158e&format=original
+    emoji: "🦞"
+  - id: 12
+    name: Drum
+    weather: Clear
+    spot: River
+    time: Dusk
+    chance: 3
+    stars: 4
+    fluff: Makes an odd thumping noise when brought out of the water.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Drum.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 13
+    name: Frog
+    weather: Rain
+    spot: Swamp
+    time: Night
+    chance: 3
+    stars: 4
+    fluff: Hop, hop, hooray! You caught a slippery amphibian.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Frog.png?ec158e&format=original
+    emoji: "🐸"
+  - id: 14
+    name: Gar
+    weather: Rain
+    spot: River
+    time: Night
+    chance: 1
+    stars: 4
+    fluff: Long, toothy, and looks straight out of the Jurassic era.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Gar.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 15
+    name: Golden Bass
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 0.37
+    stars: 4
+    fluff: It glimmers so brightly you might need sunglasses just to land it.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Golden_Bass.png?ec158e&format=original
+    emoji: "🌟"
+  - id: 16
+    name: Goldfish
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 0.37
+    stars: 4
+    fluff: Much rarer and shinier than the ones at the pet store!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Goldfish.png?ec158e&format=original
+    emoji: "🐠"
+  - id: 17
+    name: Guppy
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 3
+    stars: 4
+    fluff: Tiny, delicate, and barely heavier than the hook itself.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Guppy.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 18
+    name: King Salmon
+    weather: Rain
+    spot: River
+    time: Day
+    chance: 0.5
+    stars: 4
+    fluff: Truly royalty among river fish. Heavy and regal.
+    condition: 
+    image: https://webfishing.wiki.gg/images/King_Salmon.png?ec158e&format=original
+    emoji: "👑"
+  - id: 19
+    name: Koi
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 0.5
+    stars: 4
+    fluff: An elegant swimmer that brings good fortune to your bucket.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Koi.png?ec158e&format=original
+    emoji: "🎏"
+  - id: 20
+    name: Leech
+    weather: Rain
+    spot: Swamp
+    time: Night
+    chance: 2
+    stars: 4
+    fluff: Gross, squishy, and clingy in the worst way possible.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Leech.png?ec158e&format=original
+    emoji: "🪱"
+  - id: 21
+    name: Mooneye
+    weather: 
+    spot: River
+    time: Night
+    chance: 3
+    stars: 4
+    fluff: Its large silvery eyes reflect the night sky perfectly.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Mooneye.png?ec158e&format=original
+    emoji: "👁️"
+  - id: 22
+    name: Muskellunge
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 0.5
+    stars: 4
+    fluff: Known as the fish of ten thousand casts. You got lucky!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Muskellunge.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 23
+    name: Perch
+    weather: 
+    spot: River
+    time: Day
+    chance: 8
+    stars: 4
+    fluff: A reliable little fellow that always keeps anglers busy.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Perch.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 24
+    name: Pike
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 3
+    stars: 4
+    fluff: Slender, aggressive, and equipped with a sharp set of teeth.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Pike.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 25
+    name: Pupfish
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Tough little guys that can survive almost anywhere.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Pupfish.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 26
+    name: Rainbow Trout
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Painted with a gorgeous stripe that catches the sunlight.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Rainbow_Trout.png?ec158e&format=original
+    emoji: "🌈"
+  - id: 27
+    name: Salmon
+    weather: Rain
+    spot: River
+    time: Day
+    chance: 8
+    stars: 4
+    fluff: Swimming upstream is tough work, but getting caught is tougher.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Salmon.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 28
+    name: Snail
+    weather: Rain
+    spot: Swamp
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Moves at a glacial pace. How did it even catch the bait?
+    condition: 
+    image: https://webfishing.wiki.gg/images/Snail.png?ec158e&format=original
+    emoji: "🐌"
+  - id: 29
+    name: Sturgeon
+    weather: 
+    spot: River
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Armored like a tank and nearly as heavy.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Sturgeon.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 30
+    name: Toad
+    weather: Rain
+    spot: Swamp
+    time: Night
+    chance: 3
+    stars: 4
+    fluff: Lumpy, bumpy, and thoroughly unimpressed with you.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Toad.png?ec158e&format=original
+    emoji: "🐸"
+  - id: 31
+    name: Turtle
+    weather: Clear
+    spot: River
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Hides in its shell when pulled out, waiting for you to leave.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Turtle.png?ec158e&format=original
+    emoji: "🐢"
+  - id: 32
+    name: Walleye
+    weather: Clear
+    spot: River
+    time: Night
+    chance: 3
+    stars: 4
+    fluff: Has glassy, reflective eyes built for hunting in the dark.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Walleye.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 33
+    name: Angelfish
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Graceful fins make it look like it's gliding through the air.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Angelfish.png?ec158e&format=original
+    emoji: "🐠"
+  - id: 34
+    name: Atlantic Salmon
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 3
+    stars: 4
+    fluff: Sleek ocean cruiser built for long journeys.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Atlantic_Salmon.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 35
+    name: Bluefish
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 3
+    stars: 4
+    fluff: Feisty salt-water scrapper with a sharp bite.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Bluefish.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 36
+    name: Clownfish
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Bright orange and constantly looking for an anemone to hide in.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Clownfish.png?ec158e&format=original
+    emoji: "🐠"
+  - id: 37
+    name: Coelacanth
+    weather: Rain
+    spot: Ocean
+    time: Night
+    chance: 0.37
+    stars: 4
+    fluff: A living fossil back from the deep abyss!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Coelacanth.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 38
+    name: Dogfish
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 0.37
+    stars: 4
+    fluff: Small shark vibes with a loyal pup's determination.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Dogfish.png?ec158e&format=original
+    emoji: "🐶"
+  - id: 39
+    name: Eel
+    weather: Storm
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Long, shocking, and slippery beyond belief.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Eel.png?ec158e&format=original
+    emoji: "🐍"
+  - id: 40
+    name: Flounder
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 3
+    stars: 4
+    fluff: Flat as a pancake and both eyes are on one side!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Flounder.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 41
+    name: Golden Manta Ray
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 0.15
+    stars: 4
+    fluff: Soars through the ocean currents like a majestic golden kite.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Golden_Manta_Ray.png?ec158e&format=original
+    emoji: ✨
+  - id: 42
+    name: Great White Shark
+    weather: Storm
+    spot: Ocean
+    time: Day
+    chance: 0.37
+    stars: 4
+    fluff: You're going to need a bigger boat... or at least a bigger rod.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Great_White_Shark.png?ec158e&format=original
+    emoji: "🦈"
+  - id: 43
+    name: Grouper
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Big mouth, big body, big presence.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Grouper.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 44
+    name: Hammerhead Shark
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Unique head shape gives it 360-degree ocean views.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Hammerhead_Shark.png?ec158e&format=original
+    emoji: "🦈"
+  - id: 45
+    name: Herring
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 5
+    stars: 4
+    fluff: Travels in massive schools. Simple, silver, and classic.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Herring.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 46
+    name: Krill
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 5
+    stars: 4
+    fluff: Absolutely microscopic. Impressive that you even managed to hook it.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Krill.png?ec158e&format=original
+    emoji: "🦐"
+  - id: 47
+    name: Lionfish
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Showy spikes that scream 'do not touch me!'
+    condition: 
+    image: https://webfishing.wiki.gg/images/Lionfish.png?ec158e&format=original
+    emoji: "🦁"
+  - id: 48
+    name: Lobster
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 1
+    stars: 4
+    fluff: Fancy ocean bug with claws ready for action.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Lobster.png?ec158e&format=original
+    emoji: "🦞"
+  - id: 49
+    name: Man O' War
+    weather: Storm
+    spot: Ocean
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Looks like a balloon, stings like a nightmare.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Man_O'_War.png?ec158e&format=original
+    emoji: "🪼"
+  - id: 50
+    name: Manta Ray
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Glides gently along the sea floor like an underwater glider.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Manta_Ray.png?ec158e&format=original
+    emoji: "🪼"
+  - id: 51
+    name: Marlin
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Fast as lightning with a bill sharp enough to spear bait.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Marlin.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 52
+    name: Octopus
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Eight arms, super smart, and master of disguise.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Octopus.png?ec158e&format=original
+    emoji: "🐙"
+  - id: 53
+    name: Oyster
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Clamped shut tightly. Maybe there's a pearl inside?
+    condition: 
+    image: https://webfishing.wiki.gg/images/Oyster.png?ec158e&format=original
+    emoji: "🦪"
+  - id: 54
+    name: Sawfish
+    weather: Clear
+    spot: Ocean
+    time: Dusk
+    chance: 0.5
+    stars: 4
+    fluff: Comes equipped with its own built-in power tool.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Sawfish.png?ec158e&format=original
+    emoji: "🪚"
+  - id: 55
+    name: Seahorse
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Anchors itself with its tail and drifts with the tide.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Seahorse.png?ec158e&format=original
+    emoji: "🐴"
+  - id: 56
+    name: Sea Turtle
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Ancient, peaceful, and casually paddling through the waves.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Sea_Turtle.png?ec158e&format=original
+    emoji: "🐢"
+  - id: 57
+    name: Shrimp
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 5
+    stars: 4
+    fluff: Small, pinkish, and pops up everywhere.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Shrimp.png?ec158e&format=original
+    emoji: "🦐"
+  - id: 58
+    name: Squid
+    weather: 
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Jet-propelled ocean creature that squirts ink when startled.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Squid.png?ec158e&format=original
+    emoji: "🦑"
+  - id: 59
+    name: Sting Ray
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 1
+    stars: 4
+    fluff: Flat, graceful, but keep an eye on that tail!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Sting_Ray.png?ec158e&format=original
+    emoji: "🪼"
+  - id: 60
+    name: Sunfish
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Gigantic floating disk that loves sunbathing at the surface.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Sunfish.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 61
+    name: Swordfish
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Built for speed and ocean duels.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Swordfish.png?ec158e&format=original
+    emoji: "🗡️"
+  - id: 62
+    name: Tuna
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 1
+    stars: 4
+    fluff: Powerful swimmer that fights hard all the way to the surface.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Tuna.png?ec158e&format=original
+    emoji: "🐟"
+  - id: 63
+    name: Whale
+    weather: Clear
+    spot: Ocean
+    time: Day
+    chance: 0.15
+    stars: 4
+    fluff: Absolutely colossal! How on earth did your line not snap?
+    condition: 
+    image: https://webfishing.wiki.gg/images/Whale.png?ec158e&format=original
+    emoji: "🐋"
+  - id: 64
+    name: Wolffish
+    weather: Clear
+    spot: Ocean
+    time: Night
+    chance: 0.5
+    stars: 4
+    fluff: Fierce-looking deep-sea dweller with powerful jaws.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Wolffish.png?ec158e&format=original
+    emoji: "🐺"
+  - id: 65
+    name: Anomalocaris
+    weather: Rain
+    spot: 
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Prehistoric predator brought out by heavy downpours.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Anomalocaris.png?ec158e&format=original
+    emoji: "🦂"
+  - id: 66
+    name: Helicoprion
+    weather: Rain
+    spot: 
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Sports a bizarre tooth-whorl straight out of prehistory.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Helicoprion.png?ec158e&format=original
+    emoji: "🦈"
+  - id: 67
+    name: Horseshoe Crab
+    weather: Rain
+    spot: 
+    time: 
+    chance: 1
+    stars: 4
+    fluff: Has blue blood and has looked the same for millions of years.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Horseshoe_Crab.png?ec158e&format=original
+    emoji: "🦀"
+  - id: 68
+    name: Leedsichthys
+    weather: Rain
+    spot: 
+    time: 
+    chance: 0.15
+    stars: 4
+    fluff: A colossal ancient fish that only emerges during severe rains.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Leedsichthys.png?ec158e&format=original
+    emoji: "🐋"
+trash:
+  - id: 1001
+    name: Bone
+    weather: 
+    spot: 
+    time: 
+    chance: 20
+    stars: 4
+    fluff: Leftover remains from a long-forgotten catch.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Bone.png?ec158e&format=original
+    emoji: "🦴"
+  - id: 1002
+    name: Old Boot
+    weather: 
+    spot: 
+    time: 
+    chance: 20
+    stars: 4
+    fluff: Waterlogged and missing its partner. Classic trash catch!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Old_Boot.png?ec158e&format=original
+    emoji: "👢"
+  - id: 1003
+    name: Branch
+    weather: 
+    spot: 
+    time: 
+    chance: 25
+    stars: 4
+    fluff: Just a piece of driftwood that tricked you into thinking it was a huge fish.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Branch.png?ec158e&format=original
+    emoji: "🪵"
+  - id: 1004
+    name: Diamond
+    weather: 
+    spot: 
+    time: 
+    chance: 1
+    stars: 4
+    fluff: Sparkles brightly underwater! Someone must have dropped something precious.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Diamond.png?ec158e&format=original
+    emoji: "💎"
+  - id: 1005
+    name: Drink Rings
+    weather: 
+    spot: 
+    time: 
+    chance: 15
+    stars: 4
+    fluff: Plastic trash leftover from someone's picnic. Good thing you cleared it out!
+    condition: 
+    image: https://webfishing.wiki.gg/images/Drink_Rings.png?ec158e&format=original
+    emoji: ⭕
+  - id: 1006
+    name: Plastic Bag
+    weather: 
+    spot: 
+    time: 
+    chance: 20
+    stars: 4
+    fluff: Drifting along like a fake jellyfish.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Plastic_Bag.png?ec158e&format=original
+    emoji: "🛍️"
+  - id: 1007
+    name: Soda Can
+    weather: 
+    spot: 
+    time: 
+    chance: 20
+    stars: 4
+    fluff: Empty, crushed, and long oxidized.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Soda_Can.png?ec158e&format=original
+    emoji: "🥫"
+  - id: 1008
+    name: Weed
+    weather: 
+    spot: 
+    time: 
+    chance: 25
+    stars: 4
+    fluff: Slimey pond weed that tangled itself around your hook.
+    condition: 
+    image: https://webfishing.wiki.gg/images/Weed.png?ec158e&format=original
+    emoji: "🌿"
+items:
+  - id: 1
+    itemType: Pole
+    name: Wooden Rod
+    emoji: ''
+    description: Better than catching it with bare hands.
+    price: 1000
+    uses: 
+    durationMinutes: 
+    fishMultiplier: 1.2
+    trashMultiplier: 
+    maxStarMultiplier: 
+    rareMultiplier: 
+    fishingSpeedMultiplier: 
+    levelReq: 
+  - id: 2
+    itemType: Pole
+    name: Carbon Fiber Rod
+    emoji: ''
+    description: Lightweight, flexible, and built for serious anglers.
+    price: 10000
+    uses: 
+    durationMinutes: 
+    fishMultiplier: 1.4
+    trashMultiplier: 0.5
+    maxStarMultiplier: 1.1
+    rareMultiplier: 1.2
+    fishingSpeedMultiplier: 1.1
+    levelReq: 70
+  - id: 11
+    itemType: Pole
+    name: Magnet on a Stick
+    emoji: ''
+    description: Attracts all trash, not just metal.
+    price: 3000
+    uses: 
+    durationMinutes: 
+    fishMultiplier: 0.9
+    trashMultiplier: 2
+    maxStarMultiplier: 
+    rareMultiplier: 
+    fishingSpeedMultiplier: 
+    levelReq: 10
+  - id: 21
+    itemType: Bait
+    name: Corn
+    emoji: ''
+    description: Just some cooked corn.
+    price: 100
+    uses: 100
+    durationMinutes: 
+    fishMultiplier: 
+    trashMultiplier: 
+    maxStarMultiplier: 
+    rareMultiplier: 1.1
+    fishingSpeedMultiplier: 
+    levelReq: 
+  - id: 28
+    itemType: Bait
+    name: Chum Bucket
+    emoji: "🪣"
+    description: Creates a feeding frenzy in the water. Speeds up bites significantly.
+    price: 2000
+    uses: 50
+    durationMinutes: 
+    fishMultiplier: 1.5
+    trashMultiplier: 0.8
+    maxStarMultiplier: 1.1
+    rareMultiplier: 1.2
+    fishingSpeedMultiplier: 1.4
+    levelReq: 60
+  - id: 31
+    itemType: Potion
+    name: A Cup of Tea
+    emoji: ''
+    description: Helps you focus.
+    price: 1500
+    uses: 
+    durationMinutes: 30
+    fishMultiplier: 
+    trashMultiplier: 
+    maxStarMultiplier: 1.1
+    rareMultiplier: 
+    fishingSpeedMultiplier: 1.01
+    levelReq: 20
+  - id: 41
+    itemType: Boat
+    name: Canoe
+    emoji: ''
+    description: Lets you fish a little faster.
+    price: 3000
+    uses: 
+    durationMinutes: 
+    fishMultiplier: 
+    trashMultiplier: 
+    maxStarMultiplier: 1.1
+    rareMultiplier: 
+    fishingSpeedMultiplier: 1.201
+    levelReq: 15
+  - id: 42
+    itemType: Boat
+    name: Motorboat
+    emoji: ''
+    description: Speeds across the water to get you to the best spots 50% faster!
+    price: 10000
+    uses: 
+    durationMinutes: 
+    fishMultiplier: 1.1
+    trashMultiplier: 
+    maxStarMultiplier: 1.2
+    rareMultiplier: 
+    fishingSpeedMultiplier: 1.5
+    levelReq: 40
+  - id: 51
+    itemType: SpotCoin
+    name: Spot Change Coin
+    emoji: "🪙"
+    description: Changes the fishing spot of the channel for everyone, the spot changes every 2 hours, this immediately changes it on use. The new spot is random.
+    price: 1000
+    uses: 1
+    durationMinutes: 
+    fishMultiplier: 
+    trashMultiplier: 
+    maxStarMultiplier: 
+    rareMultiplier: 
+    fishingSpeedMultiplier: 
+    levelReq: 

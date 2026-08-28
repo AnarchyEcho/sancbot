@@ -1,2 +1,6 @@
-*
+creds.yml
 !.gitignore
+!medusae/
+medusae/*
+music_cache/*
+last_known_version.txt
