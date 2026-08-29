@@ -36,7 +36,7 @@ public sealed class FishService(
 
     // extremely rare chance, checked on every !fish use, for a co-op whale event to start.
     // tune this to taste - 0.002 = ~0.2% per cast, roughly 1 in 500.
-    private const double WHALE_EVENT_CHANCE = 0.50;
+    private const double WHALE_EVENT_CHANCE = 0.002;
     public const long WHALE_EVENT_REWARD = 1000;
 
     public System.Collections.Concurrent.ConcurrentDictionary<ulong, WhaleEvent> WhaleEvents { get; } = new();
