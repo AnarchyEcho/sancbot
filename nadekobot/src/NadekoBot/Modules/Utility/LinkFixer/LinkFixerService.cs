@@ -1,29 +1,50 @@
+﻿using System.Net;
 using System.Text.RegularExpressions;
+using Discord.Webhook;
 using LinqToDB;
 using LinqToDB.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NadekoBot.Common.ModuleBehaviors;
 using NadekoBot.Db.Models;
+using SixLabors.ImageSharp.PixelFormats;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace NadekoBot.Modules.Utility.LinkFixer;
 
 /// <summary>
 /// Service for managing link fixing functionality
 /// </summary>
-public partial class LinkFixerService(DbService db, ShardData shardData) : IReadyExecutor, IExecNoCommand, INService
+public partial class LinkFixerService(DbService db, ShardData shardData, HttpClient http)
+    : NadekoModule,
+        IReadyExecutor,
+        IExecNoCommand,
+        INService
 {
-    private readonly ConcurrentDictionary<ulong, ConcurrentDictionary<string, string>> _guildLinkFixes = new();
+    private readonly ConcurrentDictionary<
+        ulong,
+        ConcurrentDictionary<string, string>
+    > _guildLinkFixes = new();
+    private HttpClient _http = http;
 
     public async Task OnReadyAsync()
     {
         await using var uow = db.GetDbContext();
         var linkFixes = await uow.GetTable<LinkFix>()
-            .Where(Queries.GuildOnShard<LinkFix>(x => x.GuildId, shardData.TotalShards, shardData.ShardId))
+            .Where(
+                Queries.GuildOnShard<LinkFix>(
+                    x => x.GuildId,
+                    shardData.TotalShards,
+                    shardData.ShardId
+                )
+            )
             .ToListAsyncLinqToDB();
 
         foreach (var fix in linkFixes)
         {
-            var guildDict = _guildLinkFixes.GetOrAdd(fix.GuildId, _ => new(StringComparer.InvariantCultureIgnoreCase));
+            var guildDict = _guildLinkFixes.GetOrAdd(
+                fix.GuildId,
+                _ => new(StringComparer.InvariantCultureIgnoreCase)
+            );
             guildDict.TryAdd(fix.OldDomain.ToLowerInvariant(), fix.NewDomain);
         }
     }
@@ -56,14 +77,26 @@ public partial class LinkFixerService(DbService db, ShardData shardData) : IRead
                 continue;
 
             var newUrl = match.Groups["prefix"].Value + newDomain + match.Groups["suffix"].Value;
-            await msg.ReplyAsync(newUrl, allowedMentions: AllowedMentions.None);
+            var wh = await (
+                (IIntegrationChannel)await guild.GetChannelAsync(msg.Channel.Id)
+            ).CreateWebhookAsync(
+                msg.Author.Username,
+                await Image
+                    .Load<Rgba32>(await _http.GetByteArrayAsync(msg.Author.RealAvatarUrl()))
+                    .ToStreamAsync()
+            );
+            var whClient = new DiscordWebhookClient(wh.Id, wh.Token);
+            await whClient.SendMessageAsync(newUrl, allowedMentions: AllowedMentions.None);
+            await msg.DeleteAsync();
         }
     }
 
     [GeneratedRegex(@"(?<prefix>https?://)(?:www.)?(?<domain>[a-zA-Z0-9\-\.]+)(?<suffix>/.*)?")]
     private partial Regex FullUrlRegex();
-    
-    [GeneratedRegex(@"(?<prefix>https?://)?(?:ww[w\d].)?(?<domain>[a-zA-Z0-9\-\.]+)(?<suffix>/.*)?")]
+
+    [GeneratedRegex(
+        @"(?<prefix>https?://)?(?:ww[w\d].)?(?<domain>[a-zA-Z0-9\-\.]+)(?<suffix>/.*)?"
+    )]
     public partial Regex PartialUrlRegex();
 
     /// <summary>
@@ -77,26 +110,25 @@ public partial class LinkFixerService(DbService db, ShardData shardData) : IRead
     {
         oldDomain = oldDomain.ToLowerInvariant();
 
-        var guildDict = _guildLinkFixes.GetOrAdd(guildId, _ => new ConcurrentDictionary<string, string>());
+        var guildDict = _guildLinkFixes.GetOrAdd(
+            guildId,
+            _ => new ConcurrentDictionary<string, string>()
+        );
         guildDict[oldDomain] = newDomain;
 
         await using var uow = db.GetDbContext();
         await uow.GetTable<LinkFix>()
-            .InsertOrUpdateAsync(() => new LinkFix
-                {
-                    GuildId = guildId,
-                    OldDomain = oldDomain,
-                    NewDomain = newDomain
-                },
-                old => new LinkFix
-                {
-                    NewDomain = newDomain
-                },
-                () => new LinkFix
-                {
-                    GuildId = guildId,
-                    OldDomain = oldDomain,
-                });
+            .InsertOrUpdateAsync(
+                () =>
+                    new LinkFix
+                    {
+                        GuildId = guildId,
+                        OldDomain = oldDomain,
+                        NewDomain = newDomain,
+                    },
+                old => new LinkFix { NewDomain = newDomain },
+                () => new LinkFix { GuildId = guildId, OldDomain = oldDomain }
+            );
 
         return true;
     }
@@ -111,7 +143,10 @@ public partial class LinkFixerService(DbService db, ShardData shardData) : IRead
     {
         oldDomain = oldDomain.ToLowerInvariant();
 
-        if (!_guildLinkFixes.TryGetValue(guildId, out var guildDict) || !guildDict.TryRemove(oldDomain, out _))
+        if (
+            !_guildLinkFixes.TryGetValue(guildId, out var guildDict)
+            || !guildDict.TryRemove(oldDomain, out _)
+        )
             return false;
 
         await using var uow = db.GetDbContext();
