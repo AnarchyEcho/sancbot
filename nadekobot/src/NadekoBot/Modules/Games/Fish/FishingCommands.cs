@@ -133,7 +133,7 @@ public partial class Games
                     var milestoneSign = cp.GetCurrencySign();
                     var formattedReward = CurrencyHelper.N(milestoneReward, Culture, milestoneSign);
 
-                    var embedDesc = milestoneUnique == 76
+                    var embedDesc = milestoneUnique == 102
                         ? GetText(strs.fishdex_completed(milestoneUnique, formattedReward))
                         : GetText(strs.fish_milestone_reached(milestoneUnique, formattedReward));
 

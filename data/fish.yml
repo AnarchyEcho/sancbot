@@ -772,6 +772,292 @@ fish:
     condition: 
     image: https://webfishing.wiki.gg/images/Leedsichthys.png?ec158e&format=original
     emoji: "🐋"
+  - id: 69
+    name: Amazon River Dolphin
+    weather: 
+    spot: River
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Intelligently navigates flooded river basins with a distinctive pinkish glow.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/amazon_river_dolphin.png
+    emoji: "🐬"
+  - id: 70
+    name: Anglerfish
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Uses a glowing lure to entice curious prey in the dark pitch of the deep sea.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/anglerfish.png
+    emoji: "🐟"
+  - id: 71
+    name: Barreleye
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Features a transparent, dome-like head containing tubular eyes aimed upward.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/barreleye.png
+    emoji: "👁️"
+  - id: 72
+    name: Blobfish
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Looks remarkably droopy out of water, but thrives under deep-sea pressure.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/blobfish.png
+    emoji: "🫠"
+  - id: 73
+    name: Snapping Turtle
+    weather: 
+    spot: Swamp
+    time: 
+    chance: 1
+    stars: 4
+    fluff: Armed with a formidable beak and a very impatient disposition.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/Snapping_Turtle.png
+    emoji: "🐢"
+  - id: 74
+    name: Wahoo
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 1
+    stars: 4
+    fluff: An incredibly swift ocean predator built like a torpedo.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/wahoo.png
+    emoji: "🐟"
+  - id: 75
+    name: Unicorn Fish
+    weather: 
+    spot: Reef
+    time: 
+    chance: 1
+    stars: 4
+    fluff: Named for the distinctive horn projecting straight out from between its eyes.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/unicorn_fish.png
+    emoji: "🦄"
+  - id: 76
+    name: Spider Crab
+    weather: 
+    spot: Reef
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Spindly legs stretch far across the seafloor in search of scavenged morsels.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/spider_crab.png
+    emoji: "🦀"
+  - id: 77
+    name: Silver Arowana
+    weather: 
+    spot: River
+    time: 
+    chance: 1
+    stars: 4
+    fluff: A sleek predator capable of leaping far out of the water to catch prey.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/silver_arowana.png
+    emoji: "🐟"
+  - id: 78
+    name: River Otter
+    weather: 
+    spot: River
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Playful, fast, and far better at catching fish than most anglers.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/river_otter.png
+    emoji: "🦦"
+  - id: 79
+    name: Reef Triggerfish
+    weather: 
+    spot: Reef
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Uses a locking dorsal spine to anchor securely inside coral crevices.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/reef_triggerfish.png
+    emoji: "🐠"
+  - id: 80
+    name: Pufferfish
+    weather: 
+    spot: Reef
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Expands into a spiky ball when threatened, confusing line fishermen.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/pufferfish.png
+    emoji: "🐡"
+  - id: 81
+    name: Piranha
+    weather: 
+    spot: River
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Possesses razor-sharp teeth and a famous tendency to travel in schools.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/piranha.png
+    emoji: "🐟"
+  - id: 82
+    name: Pink Salmon
+    weather: 
+    spot: River
+    time: 
+    chance: 5
+    stars: 4
+    fluff: Smallest of the Pacific salmon, easily recognized by its humpback during spawning.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/pink_salmon.png
+    emoji: "🐟"
+  - id: 83
+    name: Orca
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 0.15
+    stars: 4
+    fluff: An extraordinarily clever apex marine mammal that commands the high seas.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/orca.png
+    emoji: "🐋"
+  - id: 84
+    name: Olm
+    weather: 
+    spot: Lake
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: An amphibious, blind cave dweller that can survive years without food.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/olm.png
+    emoji: "🦎"
+  - id: 85
+    name: Mudskipper
+    weather: 
+    spot: Swamp
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Uses pectoral fins to walk across mudflats as easily as swimming.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/mudskipper.png
+    emoji: "🐟"
+  - id: 86
+    name: Manatee
+    weather: 
+    spot: Swamp
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Gentle sea cow that grazes peacefully along quiet, shallow waterways.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/manatee.png
+    emoji: "🦭"
+  - id: 87
+    name: Mako Shark
+    weather: 
+    spot: Reef
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Among the fastest sharks in the sea, built for sheer velocity.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/mako_shark.png
+    emoji: "🦈"
+  - id: 88
+    name: Loch Ness Monster
+    weather: 
+    spot: Lake
+    time: 
+    chance: 0.15
+    stars: 4
+    fluff: Elusive cryptid of deep, misty waters that few anglers ever lay eyes on.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/loch_ness_monster.png
+    emoji: "🦕"
+  - id: 89
+    name: Leopard Seal
+    weather: 
+    spot: Lake
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: A powerful hunter of chilly waters with a sleek, spotted coat.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/leopard_seal.png
+    emoji: "🦭"
+  - id: 90
+    name: Goblin Shark
+    weather: 
+    spot: Swamp
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Distinctive elongated snout and jaw mechanism straight out of deep abyssal waters.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/goblin_shark.png
+    emoji: "🦈"
+  - id: 91
+    name: Giant Freshwater Stingray
+    weather: 
+    spot: Lake
+    time: 
+    chance: 0.37
+    stars: 4
+    fluff: Massive disk-shaped giant lurking buried beneath river and lake sediments.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/giant_freshwater_stingray.png
+    emoji: "🪼"
+  - id: 92
+    name: Porcupinefish
+    weather: 
+    spot: Lake
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Covered in heavy spines that stick straight out whenever it inflates.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/porcupinefish.png
+    emoji: "🐡"
+  - id: 93
+    name: Electric Eel
+    weather: 
+    spot: Swamp
+    time: 
+    chance: 0.5
+    stars: 4
+    fluff: Generates powerful electrical surges capable of stunning nearby prey.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/electric_eel.png
+    emoji: "⚡"
+  - id: 94
+    name: Flying Fish
+    weather: 
+    spot: Ocean
+    time: 
+    chance: 3
+    stars: 4
+    fluff: Launches out of the waves to glide long distances above the ocean surface.
+    condition: 
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/flying_fish.png
+    emoji: "🐟"
 trash:
   - id: 1001
     name: Bone

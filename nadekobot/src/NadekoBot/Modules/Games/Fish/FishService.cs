@@ -28,10 +28,10 @@ public sealed class FishService(
     // unique-species-caught milestones -> currency reward
     private static readonly IReadOnlyDictionary<int, long> _uniqueMilestoneRewards = new Dictionary<int, long>
     {
-        { 20, 1000 },
-        { 40, 3000 },
-        { 60, 5000 },
-        { 76, 10000 },
+        { 25, 1000 },
+        { 50, 3000 },
+        { 75, 5000 },
+        { 102, 10000 },
     };
 
     // extremely rare chance, checked on every !fish use, for a co-op whale event to start.
