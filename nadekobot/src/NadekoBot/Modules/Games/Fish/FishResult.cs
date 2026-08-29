@@ -9,6 +9,9 @@ public sealed class FishResult
     public bool IsSkillUp { get; set; }
     public int Skill { get; set; }
     public int MaxSkill { get; set; }
+    public bool IsNewSpecies { get; set; }
+    public int? MilestoneUnique { get; set; }
+    public long? MilestoneReward { get; set; }
     
     public bool IsMaxStar()
         => Stars == Fish.Stars;

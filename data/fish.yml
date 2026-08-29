@@ -15,10 +15,10 @@ spotEmojis:
   - "🐸"
   - "🪸"
 chance:
-  fish: 80
-  trash: 15
-  nothing: 4
-  currency: 2
+  fish: 410
+  trash: 11
+  nothing: 1
+  currency: 3
 # Min currency awarded when fishing out currency.
 currencyMin: 25
 # Max currency awarded when fishing out currency.
@@ -27,7 +27,7 @@ fish:
   - id: 1
     name: Alligator
     weather: 
-    spot: 
+    spot: Swamp
     time: 
     chance: 1
     stars: 4
@@ -38,7 +38,7 @@ fish:
   - id: 2
     name: Axolotl
     weather: 
-    spot: 
+    spot: Lake
     time: 
     chance: 1
     stars: 4
@@ -49,8 +49,8 @@ fish:
   - id: 3
     name: Largemouth Bass
     weather: 
-    spot: River
-    time: Day
+    spot: Lake
+    time: 
     chance: 8
     stars: 4
     fluff: The classic catch. Always puts up a respectable little fight.
@@ -59,9 +59,9 @@ fish:
     emoji: "🐟"
   - id: 4
     name: Bluegill
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 3
     stars: 4
     fluff: Vibrant and colorful, though mostly famous for stealing bait.
@@ -70,9 +70,9 @@ fish:
     emoji: "🐟"
   - id: 5
     name: Bowfin
-    weather: Rain
-    spot: River
-    time: Night
+    weather:
+    spot: Swamp
+    time: 
     chance: 0.5
     stars: 4
     fluff: An ancient survivor of murky river depths.
@@ -82,7 +82,7 @@ fish:
   - id: 6
     name: Bull Shark
     weather: 
-    spot: 
+    spot: River
     time: 
     chance: 0.5
     stars: 4
@@ -93,7 +93,7 @@ fish:
   - id: 7
     name: Carp
     weather: 
-    spot: River
+    spot: Lake
     time: 
     chance: 5
     stars: 4
@@ -103,9 +103,9 @@ fish:
     emoji: "🐟"
   - id: 8
     name: Catfish
-    weather: Rain
+    weather:
     spot: River
-    time: Night
+    time: 
     chance: 8
     stars: 4
     fluff: Has impressive whiskers and a total refusal to stay still.
@@ -115,8 +115,8 @@ fish:
   - id: 9
     name: Crab
     weather: 
-    spot: Ocean
-    time: Night
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Pinches first and asks questions never.
@@ -126,7 +126,7 @@ fish:
   - id: 10
     name: Crappie
     weather: 
-    spot: River
+    spot: Lake
     time: 
     chance: 3
     stars: 4
@@ -136,9 +136,9 @@ fish:
     emoji: "🐟"
   - id: 11
     name: Crayfish
-    weather: Rain
+    weather:
     spot: River
-    time: Night
+    time: 
     chance: 1
     stars: 4
     fluff: Looks like a pocket-sized lobster with a huge attitude.
@@ -147,9 +147,9 @@ fish:
     emoji: "🦞"
   - id: 12
     name: Drum
-    weather: Clear
-    spot: River
-    time: Dusk
+    weather:
+    spot: Lake
+    time: 
     chance: 3
     stars: 4
     fluff: Makes an odd thumping noise when brought out of the water.
@@ -158,9 +158,9 @@ fish:
     emoji: "🐟"
   - id: 13
     name: Frog
-    weather: Rain
+    weather:
     spot: Swamp
-    time: Night
+    time: 
     chance: 3
     stars: 4
     fluff: Hop, hop, hooray! You caught a slippery amphibian.
@@ -169,9 +169,9 @@ fish:
     emoji: "🐸"
   - id: 14
     name: Gar
-    weather: Rain
-    spot: River
-    time: Night
+    weather:
+    spot: Swamp
+    time: 
     chance: 1
     stars: 4
     fluff: Long, toothy, and looks straight out of the Jurassic era.
@@ -180,9 +180,9 @@ fish:
     emoji: "🐟"
   - id: 15
     name: Golden Bass
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 0.37
     stars: 4
     fluff: It glimmers so brightly you might need sunglasses just to land it.
@@ -191,9 +191,9 @@ fish:
     emoji: "🌟"
   - id: 16
     name: Goldfish
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 0.37
     stars: 4
     fluff: Much rarer and shinier than the ones at the pet store!
@@ -202,9 +202,9 @@ fish:
     emoji: "🐠"
   - id: 17
     name: Guppy
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 3
     stars: 4
     fluff: Tiny, delicate, and barely heavier than the hook itself.
@@ -213,9 +213,9 @@ fish:
     emoji: "🐟"
   - id: 18
     name: King Salmon
-    weather: Rain
+    weather:
     spot: River
-    time: Day
+    time: 
     chance: 0.5
     stars: 4
     fluff: Truly royalty among river fish. Heavy and regal.
@@ -224,9 +224,9 @@ fish:
     emoji: "👑"
   - id: 19
     name: Koi
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 0.5
     stars: 4
     fluff: An elegant swimmer that brings good fortune to your bucket.
@@ -235,9 +235,9 @@ fish:
     emoji: "🎏"
   - id: 20
     name: Leech
-    weather: Rain
+    weather:
     spot: Swamp
-    time: Night
+    time: 
     chance: 2
     stars: 4
     fluff: Gross, squishy, and clingy in the worst way possible.
@@ -247,8 +247,8 @@ fish:
   - id: 21
     name: Mooneye
     weather: 
-    spot: River
-    time: Night
+    spot: Lake
+    time: 
     chance: 3
     stars: 4
     fluff: Its large silvery eyes reflect the night sky perfectly.
@@ -257,9 +257,9 @@ fish:
     emoji: "👁️"
   - id: 22
     name: Muskellunge
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 0.5
     stars: 4
     fluff: Known as the fish of ten thousand casts. You got lucky!
@@ -269,8 +269,8 @@ fish:
   - id: 23
     name: Perch
     weather: 
-    spot: River
-    time: Day
+    spot: Lake
+    time: 
     chance: 8
     stars: 4
     fluff: A reliable little fellow that always keeps anglers busy.
@@ -279,9 +279,9 @@ fish:
     emoji: "🐟"
   - id: 24
     name: Pike
-    weather: Clear
+    weather:
     spot: River
-    time: Day
+    time: 
     chance: 3
     stars: 4
     fluff: Slender, aggressive, and equipped with a sharp set of teeth.
@@ -290,9 +290,9 @@ fish:
     emoji: "🐟"
   - id: 25
     name: Pupfish
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Lake
+    time: 
     chance: 1
     stars: 4
     fluff: Tough little guys that can survive almost anywhere.
@@ -301,9 +301,9 @@ fish:
     emoji: "🐟"
   - id: 26
     name: Rainbow Trout
-    weather: Clear
+    weather:
     spot: River
-    time: Day
+    time: 
     chance: 1
     stars: 4
     fluff: Painted with a gorgeous stripe that catches the sunlight.
@@ -312,9 +312,9 @@ fish:
     emoji: "🌈"
   - id: 27
     name: Salmon
-    weather: Rain
+    weather:
     spot: River
-    time: Day
+    time: 
     chance: 8
     stars: 4
     fluff: Swimming upstream is tough work, but getting caught is tougher.
@@ -323,7 +323,7 @@ fish:
     emoji: "🐟"
   - id: 28
     name: Snail
-    weather: Rain
+    weather:
     spot: Swamp
     time: 
     chance: 3
@@ -336,7 +336,7 @@ fish:
     name: Sturgeon
     weather: 
     spot: River
-    time: Night
+    time: 
     chance: 0.5
     stars: 4
     fluff: Armored like a tank and nearly as heavy.
@@ -345,9 +345,9 @@ fish:
     emoji: "🐟"
   - id: 30
     name: Toad
-    weather: Rain
+    weather:
     spot: Swamp
-    time: Night
+    time: 
     chance: 3
     stars: 4
     fluff: Lumpy, bumpy, and thoroughly unimpressed with you.
@@ -356,9 +356,9 @@ fish:
     emoji: "🐸"
   - id: 31
     name: Turtle
-    weather: Clear
-    spot: River
-    time: Day
+    weather:
+    spot: Swamp
+    time: 
     chance: 1
     stars: 4
     fluff: Hides in its shell when pulled out, waiting for you to leave.
@@ -367,9 +367,9 @@ fish:
     emoji: "🐢"
   - id: 32
     name: Walleye
-    weather: Clear
-    spot: River
-    time: Night
+    weather:
+    spot: Lake
+    time: 
     chance: 3
     stars: 4
     fluff: Has glassy, reflective eyes built for hunting in the dark.
@@ -378,9 +378,9 @@ fish:
     emoji: "🐟"
   - id: 33
     name: Angelfish
-    weather: Clear
-    spot: Ocean
-    time: Day
+    weather:
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Graceful fins make it look like it's gliding through the air.
@@ -389,9 +389,9 @@ fish:
     emoji: "🐠"
   - id: 34
     name: Atlantic Salmon
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 3
     stars: 4
     fluff: Sleek ocean cruiser built for long journeys.
@@ -400,9 +400,9 @@ fish:
     emoji: "🐟"
   - id: 35
     name: Bluefish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 3
     stars: 4
     fluff: Feisty salt-water scrapper with a sharp bite.
@@ -411,9 +411,9 @@ fish:
     emoji: "🐟"
   - id: 36
     name: Clownfish
-    weather: Clear
-    spot: Ocean
-    time: Day
+    weather:
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Bright orange and constantly looking for an anemone to hide in.
@@ -422,9 +422,9 @@ fish:
     emoji: "🐠"
   - id: 37
     name: Coelacanth
-    weather: Rain
-    spot: Ocean
-    time: Night
+    weather:
+    spot: Reef
+    time: 
     chance: 0.37
     stars: 4
     fluff: A living fossil back from the deep abyss!
@@ -433,9 +433,9 @@ fish:
     emoji: "🐟"
   - id: 38
     name: Dogfish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Night
+    time: 
     chance: 0.37
     stars: 4
     fluff: Small shark vibes with a loyal pup's determination.
@@ -444,9 +444,9 @@ fish:
     emoji: "🐶"
   - id: 39
     name: Eel
-    weather: Storm
-    spot: Ocean
-    time: Night
+    weather:
+    spot: Reef
+    time: 
     chance: 0.5
     stars: 4
     fluff: Long, shocking, and slippery beyond belief.
@@ -457,7 +457,7 @@ fish:
     name: Flounder
     weather: 
     spot: Ocean
-    time: Night
+    time: 
     chance: 3
     stars: 4
     fluff: Flat as a pancake and both eyes are on one side!
@@ -466,9 +466,9 @@ fish:
     emoji: "🐟"
   - id: 41
     name: Golden Manta Ray
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 0.15
     stars: 4
     fluff: Soars through the ocean currents like a majestic golden kite.
@@ -477,9 +477,9 @@ fish:
     emoji: ✨
   - id: 42
     name: Great White Shark
-    weather: Storm
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 0.37
     stars: 4
     fluff: You're going to need a bigger boat... or at least a bigger rod.
@@ -489,8 +489,8 @@ fish:
   - id: 43
     name: Grouper
     weather: 
-    spot: Ocean
-    time: Night
+    spot: Reef
+    time: 
     chance: 0.5
     stars: 4
     fluff: Big mouth, big body, big presence.
@@ -499,9 +499,9 @@ fish:
     emoji: "🐟"
   - id: 44
     name: Hammerhead Shark
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Night
+    time: 
     chance: 0.5
     stars: 4
     fluff: Unique head shape gives it 360-degree ocean views.
@@ -510,9 +510,9 @@ fish:
     emoji: "🦈"
   - id: 45
     name: Herring
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 5
     stars: 4
     fluff: Travels in massive schools. Simple, silver, and classic.
@@ -522,7 +522,7 @@ fish:
   - id: 46
     name: Krill
     weather: 
-    spot: Ocean
+    spot: Reef
     time: 
     chance: 5
     stars: 4
@@ -532,9 +532,9 @@ fish:
     emoji: "🦐"
   - id: 47
     name: Lionfish
-    weather: Clear
-    spot: Ocean
-    time: Night
+    weather:
+    spot: Reef
+    time: 
     chance: 0.5
     stars: 4
     fluff: Showy spikes that scream 'do not touch me!'
@@ -544,8 +544,8 @@ fish:
   - id: 48
     name: Lobster
     weather: 
-    spot: Ocean
-    time: Night
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Fancy ocean bug with claws ready for action.
@@ -554,7 +554,7 @@ fish:
     emoji: "🦞"
   - id: 49
     name: Man O' War
-    weather: Storm
+    weather:
     spot: Ocean
     time: 
     chance: 0.5
@@ -565,9 +565,9 @@ fish:
     emoji: "🪼"
   - id: 50
     name: Manta Ray
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 1
     stars: 4
     fluff: Glides gently along the sea floor like an underwater glider.
@@ -576,9 +576,9 @@ fish:
     emoji: "🪼"
   - id: 51
     name: Marlin
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 1
     stars: 4
     fluff: Fast as lightning with a bill sharp enough to spear bait.
@@ -588,8 +588,8 @@ fish:
   - id: 52
     name: Octopus
     weather: 
-    spot: Ocean
-    time: Night
+    spot: Reef
+    time: 
     chance: 0.5
     stars: 4
     fluff: Eight arms, super smart, and master of disguise.
@@ -599,7 +599,7 @@ fish:
   - id: 53
     name: Oyster
     weather: 
-    spot: Ocean
+    spot: Reef
     time: 
     chance: 3
     stars: 4
@@ -609,9 +609,9 @@ fish:
     emoji: "🦪"
   - id: 54
     name: Sawfish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Dusk
+    time: 
     chance: 0.5
     stars: 4
     fluff: Comes equipped with its own built-in power tool.
@@ -620,9 +620,9 @@ fish:
     emoji: "🪚"
   - id: 55
     name: Seahorse
-    weather: Clear
-    spot: Ocean
-    time: Day
+    weather:
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Anchors itself with its tail and drifts with the tide.
@@ -631,9 +631,9 @@ fish:
     emoji: "🐴"
   - id: 56
     name: Sea Turtle
-    weather: Clear
-    spot: Ocean
-    time: Day
+    weather:
+    spot: Reef
+    time: 
     chance: 1
     stars: 4
     fluff: Ancient, peaceful, and casually paddling through the waves.
@@ -643,8 +643,8 @@ fish:
   - id: 57
     name: Shrimp
     weather: 
-    spot: Ocean
-    time: Night
+    spot: Reef
+    time: 
     chance: 5
     stars: 4
     fluff: Small, pinkish, and pops up everywhere.
@@ -655,7 +655,7 @@ fish:
     name: Squid
     weather: 
     spot: Ocean
-    time: Night
+    time: 
     chance: 0.5
     stars: 4
     fluff: Jet-propelled ocean creature that squirts ink when startled.
@@ -664,9 +664,9 @@ fish:
     emoji: "🦑"
   - id: 59
     name: Sting Ray
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Night
+    time: 
     chance: 1
     stars: 4
     fluff: Flat, graceful, but keep an eye on that tail!
@@ -675,9 +675,9 @@ fish:
     emoji: "🪼"
   - id: 60
     name: Sunfish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 1
     stars: 4
     fluff: Gigantic floating disk that loves sunbathing at the surface.
@@ -686,9 +686,9 @@ fish:
     emoji: "🐟"
   - id: 61
     name: Swordfish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Night
+    time: 
     chance: 0.5
     stars: 4
     fluff: Built for speed and ocean duels.
@@ -697,9 +697,9 @@ fish:
     emoji: "🗡️"
   - id: 62
     name: Tuna
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
+    time: 
     chance: 1
     stars: 4
     fluff: Powerful swimmer that fights hard all the way to the surface.
@@ -708,20 +708,20 @@ fish:
     emoji: "🐟"
   - id: 63
     name: Whale
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Day
-    chance: 0.15
+    time: 
+    chance: 0
     stars: 4
-    fluff: Absolutely colossal! How on earth did your line not snap?
+    fluff: Absolutely colossal! How on earth did your line not snap? You must have had lots of help!
     condition: 
     image: https://webfishing.wiki.gg/images/Whale.png?ec158e&format=original
     emoji: "🐋"
   - id: 64
     name: Wolffish
-    weather: Clear
+    weather:
     spot: Ocean
-    time: Night
+    time: 
     chance: 0.5
     stars: 4
     fluff: Fierce-looking deep-sea dweller with powerful jaws.
@@ -730,8 +730,8 @@ fish:
     emoji: "🐺"
   - id: 65
     name: Anomalocaris
-    weather: Rain
-    spot: 
+    weather:
+    spot: Reef
     time: 
     chance: 0.37
     stars: 4
@@ -741,8 +741,8 @@ fish:
     emoji: "🦂"
   - id: 66
     name: Helicoprion
-    weather: Rain
-    spot: 
+    weather:
+    spot: Ocean
     time: 
     chance: 0.37
     stars: 4
@@ -752,8 +752,8 @@ fish:
     emoji: "🦈"
   - id: 67
     name: Horseshoe Crab
-    weather: Rain
-    spot: 
+    weather:
+    spot: Reef
     time: 
     chance: 1
     stars: 4
@@ -763,8 +763,8 @@ fish:
     emoji: "🦀"
   - id: 68
     name: Leedsichthys
-    weather: Rain
-    spot: 
+    weather:
+    spot: Ocean
     time: 
     chance: 0.15
     stars: 4
@@ -916,30 +916,30 @@ items:
     trashMultiplier: 
     maxStarMultiplier: 
     rareMultiplier: 1.1
-    fishingSpeedMultiplier: 
+    fishingSpeedMultiplier: 1.1 
     levelReq: 
   - id: 28
     itemType: Bait
     name: Chum Bucket
     emoji: "🪣"
     description: Creates a feeding frenzy in the water. Speeds up bites significantly.
-    price: 2000
+    price: 1500
     uses: 50
     durationMinutes: 
     fishMultiplier: 1.5
     trashMultiplier: 0.8
     maxStarMultiplier: 1.1
     rareMultiplier: 1.2
-    fishingSpeedMultiplier: 1.4
+    fishingSpeedMultiplier: 1.6
     levelReq: 60
   - id: 31
     itemType: Potion
     name: A Cup of Tea
     emoji: ''
     description: Helps you focus.
-    price: 1500
+    price: 1000
     uses: 
-    durationMinutes: 30
+    durationMinutes: 60
     fishMultiplier: 
     trashMultiplier: 
     maxStarMultiplier: 1.1
@@ -951,7 +951,7 @@ items:
     name: Canoe
     emoji: ''
     description: Lets you fish a little faster.
-    price: 3000
+    price: 2000
     uses: 
     durationMinutes: 
     fishMultiplier: 
@@ -964,21 +964,21 @@ items:
     itemType: Boat
     name: Motorboat
     emoji: ''
-    description: Speeds across the water to get you to the best spots 50% faster!
-    price: 10000
+    description: Speeds across the water to get you to the best spots 80% faster!
+    price: 5000
     uses: 
     durationMinutes: 
     fishMultiplier: 1.1
     trashMultiplier: 
     maxStarMultiplier: 1.2
     rareMultiplier: 
-    fishingSpeedMultiplier: 1.5
+    fishingSpeedMultiplier: 1.8
     levelReq: 40
   - id: 51
     itemType: SpotCoin
     name: Spot Change Coin
     emoji: "🪙"
-    description: Changes the fishing spot of the channel for everyone, the spot changes every 2 hours, this immediately changes it on use. The new spot is random.
+    description: Changes the fishing spot in the channel for everyone, spots last until changed. The new spot is random.
     price: 1000
     uses: 1
     durationMinutes: 
@@ -987,4 +987,4 @@ items:
     maxStarMultiplier: 
     rareMultiplier: 
     fishingSpeedMultiplier: 
-    levelReq: 
+    levelReq:

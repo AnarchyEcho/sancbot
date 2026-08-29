@@ -17,5 +17,6 @@
   "fish_gift_self": "You can't gift items to yourself.",
   "fish_gift_not_owned": "You don't own this item.",
   "fish_gift_equipped": "You can't gift equipped items. Unequip it first.",
-  "fish_gift_success": "Item successfully gifted to {0}!"
+  "fish_gift_success": "Item successfully gifted to {0}!",
+  "fish_spot_any": "Any"
 }

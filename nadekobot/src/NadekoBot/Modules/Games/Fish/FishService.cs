@@ -25,6 +25,23 @@ public sealed class FishService(
 {
     private const double MAX_SKILL = 100;
 
+    // unique-species-caught milestones -> currency reward
+    private static readonly IReadOnlyDictionary<int, long> _uniqueMilestoneRewards = new Dictionary<int, long>
+    {
+        { 20, 1000 },
+        { 40, 3000 },
+        { 60, 5000 },
+        { 76, 10000 },
+    };
+
+    // extremely rare chance, checked on every !fish use, for a co-op whale event to start.
+    // tune this to taste - 0.002 = ~0.2% per cast, roughly 1 in 500.
+    private const double WHALE_EVENT_CHANCE = 0.50;
+    public const long WHALE_EVENT_REWARD = 1000;
+
+    public System.Collections.Concurrent.ConcurrentDictionary<ulong, WhaleEvent> WhaleEvents { get; } = new();
+
+
     private readonly NadekoRandom _rng = new();
 
     private static TypedKey<bool> FishingKey(ulong userId)
@@ -56,10 +73,28 @@ public sealed class FishService(
         var fishChanceMultiplier = Math.Clamp((playerSkill + 20) / MAX_SKILL, 0, 1);
         var trashChanceMultiplier = Math.Clamp(((2 * MAX_SKILL) - playerSkill) / MAX_SKILL, 1, 2);
 
+        // nothing/currency keep a fixed share of the total, based on the configured base
+        // values, regardless of skill. Skill only shifts probability between fish and trash.
         var nothingChance = conf.Chance.Nothing;
-        var fishChance = conf.Chance.Fish * fishChanceMultiplier * multipliers.FishMultiplier;
-        var trashChance = conf.Chance.Trash * trashChanceMultiplier * multipliers.TrashMultiplier;
         var currencyChance = conf.Chance.Currency;
+        var fishTrashChance = conf.Chance.Fish + conf.Chance.Trash;
+
+        var fishWeight = conf.Chance.Fish * fishChanceMultiplier * multipliers.FishMultiplier;
+        var trashWeight = conf.Chance.Trash * trashChanceMultiplier * multipliers.TrashMultiplier;
+        var fishTrashWeight = fishWeight + trashWeight;
+
+        double fishChance;
+        double trashChance;
+        if (fishTrashWeight > 0)
+        {
+            fishChance = fishTrashChance * (fishWeight / fishTrashWeight);
+            trashChance = fishTrashChance * (trashWeight / fishTrashWeight);
+        }
+        else
+        {
+            fishChance = 0;
+            trashChance = 0;
+        }
 
         // first roll whether it's fish, trash, currency or nothing
         var totalChance = fishChance + trashChance + nothingChance + currencyChance;
@@ -137,6 +172,79 @@ public sealed class FishService(
             return new FishNothing();
 
         return result;
+    }
+
+    /// <summary>
+    /// Extremely rare chance to start a co-op whale event in this channel.
+    /// Independent of the normal catch roll above - call this after handling
+    /// a normal !fish outcome. Returns null if it didn't trigger, or if a
+    /// whale event is already active in this channel.
+    /// </summary>
+    public WhaleEvent? TryTriggerWhaleEvent(ulong channelId, ulong userId, string username)
+    {
+        if (_rng.NextDouble() >= WHALE_EVENT_CHANCE)
+            return null;
+
+        var newEvent = new WhaleEvent(userId, username);
+        var whaleEvent = WhaleEvents.GetOrAdd(channelId, newEvent);
+
+        if (whaleEvent != newEvent)
+        {
+            // an event is already active in this channel, don't start a second one
+            newEvent.Dispose();
+            return null;
+        }
+
+        whaleEvent.OnSucceeded += _ => ResolveWhaleEventAsync(channelId, whaleEvent);
+        whaleEvent.OnFailed += _ =>
+        {
+            WhaleEvents.TryRemove(channelId, out WhaleEvent? _);
+            whaleEvent.Dispose();
+            return Task.CompletedTask;
+        };
+
+        return whaleEvent;
+    }
+
+    private async Task ResolveWhaleEventAsync(ulong channelId, WhaleEvent whaleEvent)
+    {
+        WhaleEvents.TryRemove(channelId, out WhaleEvent? _);
+
+        var stars = _rng.Next(1, 5); // 1-4 inclusive, everyone lands the same whale
+
+        var whale = (await GetAllFish())
+            .FirstOrDefault(x => x.Name.Equals("Whale", StringComparison.OrdinalIgnoreCase));
+
+        foreach (var (uid, _) in whaleEvent.AllParticipants)
+        {
+            if (whale is not null)
+            {
+                await using var uow = db.GetDbContext();
+
+                await uow.GetTable<FishCatch>()
+                    .InsertOrUpdateAsync(() => new FishCatch()
+                        {
+                            UserId = uid,
+                            FishId = whale.Id,
+                            MaxStars = stars,
+                            Count = 1
+                        },
+                        (old) => new FishCatch()
+                        {
+                            Count = old.Count + 1,
+                            MaxStars = Math.Max(old.MaxStars, stars),
+                        },
+                        () => new()
+                        {
+                            FishId = whale.Id,
+                            UserId = uid
+                        });
+            }
+
+            await cs.AddAsync(uid, WHALE_EVENT_REWARD, new("fish", "whale_event"));
+        }
+
+        whaleEvent.Dispose();
     }
 
     private async Task<bool> TrySkillUpAsync(ulong userId, int playerSkill)
@@ -270,6 +378,12 @@ public sealed class FishService(
         {
             await using var uow = db.GetDbContext();
 
+            var existingCatches = await uow.GetTable<FishCatch>()
+                .Where(x => x.UserId == userId)
+                .ToListAsyncLinqToDB();
+
+            var isNewSpecies = existingCatches.All(x => x.FishId != caught.Fish.Id);
+
             await uow.GetTable<FishCatch>()
                 .InsertOrUpdateAsync(() => new FishCatch()
                     {
@@ -288,6 +402,20 @@ public sealed class FishService(
                         FishId = caught.Fish.Id,
                         UserId = userId
                     });
+
+            caught.IsNewSpecies = isNewSpecies;
+
+            if (isNewSpecies)
+            {
+                var uniqueCount = existingCatches.Count + 1;
+
+                if (_uniqueMilestoneRewards.TryGetValue(uniqueCount, out var reward))
+                {
+                    await cs.AddAsync(userId, reward, new("fish", "milestone"));
+                    caught.MilestoneUnique = uniqueCount;
+                    caught.MilestoneReward = reward;
+                }
+            }
 
             return caught;
         }

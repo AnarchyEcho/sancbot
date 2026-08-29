@@ -81,3 +81,11 @@ fishstarslb:
   params:
     - page:
         desc: The optional page to display.
+fishhelp:
+  desc: |-
+    Join an active co-op whale event to help bring it in.
+    Two other anglers are needed within 60 seconds or the whale gets away.
+  ex:
+    - ''
+  params:
+    - {}

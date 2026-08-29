@@ -8,9 +8,11 @@ fish_items_title: Fishing Shop
 fish_lb_title: Fishing Leaderboard
 fish_list_title: Fishing
 fish_nothing: You caught nothing, try again.
+fish_new_species: "🎉 A new species for your Fishdex!"
 fish_quality: Quality
 fish_skill_up: Fishing skill increased to **{0} / {1}**
 fish_spot: Spot
+fish_spot_any: Any
 fish_tod: Time of Day
 fish_unequip_success: Item unequipped successfully!
 fish_unique: Caught {0} unique fish
@@ -24,3 +26,11 @@ fish_stars: "{0} {1}"
 fish_spot_coin_none: "You don't have a spot change coin."
 fish_spot_changed: "The fishing spot has been changed to {0}!"
 fish_level_too_low: "You need fishing skill level **{0}** to buy this item."
+fish_milestone_reached: "🏆 You've caught **{0}** unique fish! Bonus: {1}"
+fishdex_completed: "🏆 You've completed the Fishdex! Bonus: {1}!"
+fish_whale_spotted: "🐋 {0} has spotted a massive whale! Type `!fishhelp` to grab a rope — need **{1}** more anglers within **{2}** seconds or it swims away!"
+fish_whale_progress: "🐋 {0}/{1} anglers aboard — **{2}** more needed before time's up!"
+fish_whale_success: "🐋 {0} hauled in the whale together! Each angler earns {1}!"
+fish_whale_failed: "🐋 The whale slipped away before enough anglers could grab hold..."
+fish_whale_none: "There's no whale event happening right now."
+fish_whale_cant_join: "You can't join this whale event."

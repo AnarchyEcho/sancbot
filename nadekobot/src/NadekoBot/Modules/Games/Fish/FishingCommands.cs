@@ -20,6 +20,8 @@ public partial class Games
     {
         private static readonly NadekoRandom _rng = new();
 
+        private const string WHALE_IMAGE_URL = "https://webfishing.wiki.gg/images/Whale.png?ec158e&format=original";
+
         private TypedKey<bool> FishingWhitelistKey(ulong userId)
             => new($"fishingwhitelist:{userId}");
 
@@ -111,6 +113,11 @@ public partial class Games
                     desc += "\n" + GetText(strs.fish_skill_up(res.Skill, res.MaxSkill));
                 }
 
+                if (res.IsNewSpecies)
+                {
+                    desc += "\n" + GetText(strs.fish_new_species);
+                }
+
                 await Response()
                     .Embed(CreateEmbed()
                         .WithOkColor()
@@ -120,6 +127,23 @@ public partial class Games
                         .AddField(GetText(strs.desc), res.Fish.Fluff, true)
                         .WithThumbnailUrl(res.Fish.Image))
                     .SendAsync();
+
+                if (res.MilestoneUnique is int milestoneUnique && res.MilestoneReward is long milestoneReward)
+                {
+                    var milestoneSign = cp.GetCurrencySign();
+                    var formattedReward = CurrencyHelper.N(milestoneReward, Culture, milestoneSign);
+
+                    var embedDesc = milestoneUnique == 76
+                        ? GetText(strs.fishdex_completed(milestoneUnique, formattedReward))
+                        : GetText(strs.fish_milestone_reached(milestoneUnique, formattedReward));
+
+                    await Response()
+                        .Embed(CreateEmbed()
+                            .WithOkColor()
+                            .WithAuthor(ctx.User)
+                            .WithDescription(embedDesc))
+                        .SendAsync();
+                }
             }
             else if (remainder.TryPickT0(out var cur, out _))
             {
@@ -144,6 +168,91 @@ public partial class Games
             }
 
             await msg.DeleteAsync();
+
+            // extremely rare, independent of the catch above - a whale may surface
+            TryStartWhaleEvent();
+        }
+
+        private void TryStartWhaleEvent()
+        {
+            var whaleEvent = fs.TryTriggerWhaleEvent(ctx.Channel.Id, ctx.User.Id, ctx.User.ToString()!);
+            if (whaleEvent is null)
+                return;
+
+            IUserMessage? whaleMsg = null;
+
+            whaleEvent.OnHelperJoined += async we =>
+            {
+                if (whaleMsg is null)
+                    return;
+
+                var needed = WhaleEvent.REQUIRED_HELPERS - we.Helpers.Count;
+
+                try
+                {
+                    await whaleMsg.ModifyAsync(x => x.Embed = CreateEmbed()
+                        .WithOkColor()
+                        .WithThumbnailUrl(WHALE_IMAGE_URL)
+                        .WithDescription(GetText(strs.fish_whale_progress(we.Helpers.Count,
+                            WhaleEvent.REQUIRED_HELPERS,
+                            needed)))
+                        .Build());
+                }
+                catch { }
+            };
+
+            whaleEvent.OnSucceeded += async we =>
+            {
+                var names = string.Join(", ", we.AllParticipants.Select(x => x.Username));
+                var sign = cp.GetCurrencySign();
+                var reward = CurrencyHelper.N(FishService.WHALE_EVENT_REWARD, Culture, sign);
+
+                await Response()
+                    .Embed(CreateEmbed()
+                        .WithOkColor()
+                        .WithThumbnailUrl(WHALE_IMAGE_URL)
+                        .WithDescription(GetText(strs.fish_whale_success(names, reward))))
+                    .SendAsync();
+            };
+
+            whaleEvent.OnFailed += async _ =>
+            {
+                await Response().Error(strs.fish_whale_failed).SendAsync();
+            };
+
+            whaleEvent.Initialize();
+
+            _ = SendAnnouncementAsync();
+
+            async Task SendAnnouncementAsync()
+            {
+                whaleMsg = await Response()
+                    .Embed(CreateEmbed()
+                        .WithOkColor()
+                        .WithThumbnailUrl(WHALE_IMAGE_URL)
+                        .WithDescription(GetText(strs.fish_whale_spotted(ctx.User.ToString(),
+                            WhaleEvent.REQUIRED_HELPERS,
+                            WhaleEvent.DURATION_SECONDS))))
+                    .SendAsync();
+            }
+        }
+
+        [Cmd]
+        [RequireContext(ContextType.Guild)]
+        public async Task FishHelp()
+        {
+            if (!fs.WhaleEvents.TryGetValue(ctx.Channel.Id, out var whaleEvent))
+            {
+                await Response().Error(strs.fish_whale_none).SendAsync();
+                return;
+            }
+
+            var joined = await whaleEvent.Join(ctx.User.Id, ctx.User.ToString()!);
+
+            if (!joined)
+            {
+                await Response().Error(strs.fish_whale_cant_join).SendAsync();
+            }
         }
 
         [Cmd]
@@ -224,7 +333,15 @@ public partial class Games
                         }
                         else
                         {
-                            eb.AddField("?", GetFishEmoji(null, 0) + "\n" + fs.GetStarText(0, f.Stars), true);
+                            var spotHint = f.Spot is null
+                                ? "🌍 " + GetText(strs.fish_spot_any)
+                                : GetSpotEmoji(f.Spot) + " " + f.Spot;
+
+                            eb.AddField("?",
+                                spotHint
+                                + "\n"
+                                + fs.GetStarText(0, f.Stars),
+                                true);
                         }
                     }
 
