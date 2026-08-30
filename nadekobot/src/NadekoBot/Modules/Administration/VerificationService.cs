@@ -291,15 +291,25 @@ public class VerificationService
             pendingMessage.WithTextDisplay(
                 $"""
                 ## {qOne}
-                > {components.First(x => x.CustomId == $"qOne{userId}").Value}
+                > {components.First(x => x.CustomId == $"qOne{userId}").Value.ReplaceLineEndings(
+                    System.Environment.NewLine + "> "
+                )}
                 ## {qTwo}
-                > {components.First(x => x.CustomId == $"qTwo{userId}").Value}
+                > {components.First(x => x.CustomId == $"qTwo{userId}").Value.ReplaceLineEndings(
+                    System.Environment.NewLine + "> "
+                )}
                 ## {qThree}
-                > {components.First(x => x.CustomId == $"qThree{userId}").Value}
+                > {components.First(x => x.CustomId == $"qThree{userId}").Value.ReplaceLineEndings(
+                    System.Environment.NewLine + "> "
+                )}
                 ## {qFour}
-                > {components.First(x => x.CustomId == $"qFour{userId}").Value}
+                > {components.First(x => x.CustomId == $"qFour{userId}").Value.ReplaceLineEndings(
+                    System.Environment.NewLine + "> "
+                )}
                 ## {qFive}
-                > {components.First(x => x.CustomId == $"qFive{userId}").Value}
+                > {components.First(x => x.CustomId == $"qFive{userId}").Value.ReplaceLineEndings(
+                    System.Environment.NewLine + "> "
+                )}
                 """,
                 55
             );
