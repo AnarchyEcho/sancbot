@@ -327,12 +327,12 @@ public class VerificationService
                 style: ButtonStyle.Success,
                 emote: new Emoji("✅")
             );
-            actionRow.WithButton(
-                label: "Approve (18+)",
-                customId: $"approveAdultBtn{userId}",
-                style: ButtonStyle.Secondary,
-                emote: new Emoji("🔞")
-            );
+            // actionRow.WithButton(
+            //     label: "Approve (18+)",
+            //     customId: $"approveAdultBtn{userId}",
+            //     style: ButtonStyle.Secondary,
+            //     emote: new Emoji("🔞")
+            // );
             actionRow.WithButton(
                 label: "Reject",
                 customId: $"rejectBtn{userId}",
