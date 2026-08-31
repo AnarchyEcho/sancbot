@@ -82,6 +82,18 @@ shoplistadd:
           The position at which to insert the new item in the list of items for sale.
       itemText:
         desc: The description or name of the item being added to the list.
+shopchangedescription:
+  desc: |-
+    Change the description of a shop entry at the specified index. This replaces the default "You will get X role." text shown in the shop listing. Run without a description to clear it and go back to the default text.
+  ex:
+    - 1 Gives you a cool blue color and an extra heart!
+    - 1
+  params:
+    - index:
+        desc: The index of the shop entry to modify.
+      newDescription:
+        desc: |-
+          The new description shown for this item in the shop listing. Leave empty to clear it.
 shopmove:
   desc: Moves the shop entry from the current index to a new one
   ex:

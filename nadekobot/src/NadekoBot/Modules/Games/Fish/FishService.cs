@@ -451,7 +451,7 @@ public sealed class FishService(
         return GetDefaultSpot(channelId);
     }
 
-    private static FishingSpot GetDefaultSpot(ulong channelId)
+    internal static FishingSpot GetDefaultSpot(ulong channelId)
     {
         var cid = (channelId >> 22 >> 29) % 10;
 

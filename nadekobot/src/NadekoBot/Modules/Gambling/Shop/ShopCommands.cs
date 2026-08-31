@@ -549,6 +549,24 @@ public partial class Gambling
         [Cmd]
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.Administrator)]
+        public async Task ShopChangeDescription(int index, [Leftover] string newDescription = null)
+        {
+            if (--index < 0)
+                return;
+
+            var succ = await _service.ChangeEntryDescriptionAsync(ctx.Guild.Id, index, newDescription);
+            if (succ)
+            {
+                await ShopInternalAsync(index / 9);
+                await ctx.OkAsync();
+            }
+            else
+                await ctx.ErrorAsync();
+        }
+
+        [Cmd]
+        [RequireContext(ContextType.Guild)]
+        [UserPerm(GuildPerm.Administrator)]
         public async Task ShopSwap(int index1, int index2)
         {
             if (--index1 < 0 || --index2 < 0 || index1 == index2)
@@ -611,6 +629,9 @@ public partial class Gambling
         {
             var embed = CreateEmbed().WithOkColor();
 
+            if (!string.IsNullOrWhiteSpace(entry.Description))
+                embed.WithDescription(entry.Description);
+
             if (entry.Type == ShopEntryType.Role)
             {
                 var roleDisplayName =
@@ -665,6 +686,12 @@ public partial class Gambling
                     Format.Italics(
                         GetText(strs.shop_item_requires_role($"<@&{entry.RoleRequirement}>"))
                     ) + Environment.NewLine;
+
+            // A custom description, when set, replaces the default generated line -
+            // e.g. instead of "You will get **Femboy** role.", an admin can write
+            // "Gives you a cute pink color and a matching ribbon @Femboy role!"
+            if (!string.IsNullOrWhiteSpace(entry.Description))
+                return prepend + entry.Description;
 
             if (entry.Type == ShopEntryType.Role)
                 return prepend

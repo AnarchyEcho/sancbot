@@ -287,7 +287,7 @@ public partial class Gambling : GamblingModule<GamblingService>
         }
 
 
-        var val = Config.Timely.Amount;
+        var val = _rng.Next(50, 76); // random base reward, 50-75 inclusive
         var inter = CreateRemindMeInteraction(period);
 
         var prepend = GetText(strs.timely(N(val), period));
@@ -690,6 +690,13 @@ public partial class Gambling : GamblingModule<GamblingService>
             await Response().Error(strs.not_enough(CurrencySign)).SendAsync();
             return;
         }
+
+        await _quests.ReportActionAsync(ctx.User.Id,
+            QuestEventType.Give,
+            new()
+            {
+                { "amount", amount.ToString() }
+            });
 
         await Response().Confirm(strs.gifted(N(amount), Format.Bold(receiver.ToString()), ctx.User)).SendAsync();
     }

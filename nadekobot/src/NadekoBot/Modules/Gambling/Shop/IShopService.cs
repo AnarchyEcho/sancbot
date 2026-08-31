@@ -41,6 +41,16 @@ public interface IShopService
     /// <returns>Whether swap was successful</returns>
     Task<bool> MoveEntryAsync(ulong guildId, int fromIndex, int toIndex);
 
+    /// <summary>
+    ///     Changes the description of a shop item. Pass null or whitespace to clear it,
+    ///     falling back to the default generated text.
+    /// </summary>
+    /// <param name="guildId">Id of the guild in which the shop is</param>
+    /// <param name="index">Index of the item</param>
+    /// <param name="newDescription">New item description, or null to clear</param>
+    /// <returns>Success status</returns>
+    Task<bool> ChangeEntryDescriptionAsync(ulong guildId, int index, string newDescription);
+
     Task<bool> SetItemRoleRequirementAsync(ulong guildId, int index, ulong? roleId);
     Task<ShopEntry> AddShopCommandAsync(ulong guildId, ulong userId, int price, string command);
 }

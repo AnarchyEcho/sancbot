@@ -73,7 +73,8 @@ public sealed class MuteService : INService, IReadyExecutor
                         .CreateEmbed(user.GuildId)
                         .WithDescription($"You've been muted in {user.Guild} server")
                         .AddField("Mute Type", type.ToString())
-                        .AddField("Moderator", mod.ToString())
+                        //Commented out so users don't see which mods muted them
+                        //.AddField("Moderator", mod.ToString())
                         .AddField("Reason", reason)
                 )
                 .SendAsync()
@@ -93,7 +94,8 @@ public sealed class MuteService : INService, IReadyExecutor
                         .CreateEmbed(user.GuildId)
                         .WithDescription($"You've been unmuted in {user.Guild} server")
                         .AddField("Unmute Type", type.ToString())
-                        .AddField("Moderator", mod.ToString())
+                        //Commented out so users don't see which mods muted them
+                        //.AddField("Moderator", mod.ToString())
                         .AddField("Reason", reason)
                 )
                 .SendAsync()

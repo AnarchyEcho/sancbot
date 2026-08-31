@@ -792,7 +792,7 @@ public class UserPunishService : INService, IReadyExecutor
                 description = localizedDescription,
                 fields = new[]
                 {
-                    new { name = localizedModLabel, value = moderator.ToString(), inline = false },
+                    // new { name = localizedModLabel, value = moderator.ToString(), inline = false },
                     new { name = localizedReasonLabel, value = warnReason, inline = false }
                 }
             });

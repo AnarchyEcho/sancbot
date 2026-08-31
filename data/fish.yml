@@ -1034,7 +1034,7 @@ fish:
     stars: 4
     fluff: Covered in heavy spines that stick straight out whenever it inflates.
     condition: 
-    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/porcupinefish.png
+    image: https://raw.githubusercontent.com/Agentfunfun/Sanctuary-Fish/refs/heads/main/freckled_porcupinefish.png
     emoji: "🐡"
   - id: 93
     name: Electric Eel

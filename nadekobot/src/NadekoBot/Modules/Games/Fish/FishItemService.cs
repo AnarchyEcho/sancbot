@@ -1,5 +1,6 @@
 using LinqToDB;
 using LinqToDB.EntityFrameworkCore;
+using NadekoBot.Modules.Games.Fish;
 using NadekoBot.Modules.Games.Fish.Db;
 
 namespace NadekoBot.Modules.Games;
@@ -267,10 +268,16 @@ public sealed class FishItemService(
             if (userItem is null)
                 return UseSpotCoinResult.NotOwned;
 
-            var currentSpot = await ctx.GetTable<ChannelSpotOverride>()
+            var overrideSpot = await ctx.GetTable<ChannelSpotOverride>()
                 .Where(x => x.ChannelId == channelId)
                 .Select(x => (FishingSpot?)x.Spot)
                 .FirstOrDefaultAsyncLinqToDB();
+
+            // A channel without an override row isn't "spot-less" - it's still
+            // effectively on FishService's deterministic default spot for its id.
+            // Excluding only the override (and treating "no override" as excluding
+            // nothing) let the coin re-roll the spot the channel was already on.
+            var currentSpot = overrideSpot ?? FishService.GetDefaultSpot(channelId);
 
             var spots = Enum.GetValues<FishingSpot>()
                 .Where(s => s != currentSpot)

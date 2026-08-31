@@ -5,6 +5,9 @@ shop:
   - shop
 shopadd:
   - shopadd
+shopchangedescription:
+  - shopchangedescription
+  - shopdesc
 shopchangename:
   - shopchangename
   - shopname

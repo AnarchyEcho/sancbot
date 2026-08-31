@@ -59,6 +59,25 @@ public class ShopService : IShopService, INService
         return changed > 0;
     }
 
+    public async Task<bool> ChangeEntryDescriptionAsync(ulong guildId, int index, string newDescription)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(index);
+
+        newDescription = string.IsNullOrWhiteSpace(newDescription)
+            ? null
+            : newDescription.TrimTo(300);
+
+        await using var uow = _db.GetDbContext();
+
+        var changed = await uow.GetTable<ShopEntry>()
+                               .Where(x => x.GuildId == guildId && x.Index == index)
+                               .UpdateAsync(x => new ShopEntry()
+                               {
+                                   Description = newDescription,
+                               });
+        return changed > 0;
+    }
+
     public async Task<bool> SwapEntriesAsync(ulong guildId, int index1, int index2)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index1);

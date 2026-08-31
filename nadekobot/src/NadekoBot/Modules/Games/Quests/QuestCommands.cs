@@ -18,8 +18,8 @@ public partial class Games
 
             var allDone = quests.All(x => x.UserQuest.IsCompleted);
 
-            var tmrw = now.AddDays(1).Date;
-            var desc = GetText(strs.dailies_reset(TimestampTag.FromDateTime(tmrw, TimestampTagStyles.Relative)));
+            var nextReset = _service.GetNextResetUtc(now);
+            var desc = GetText(strs.dailies_reset(TimestampTag.FromDateTime(nextReset, TimestampTagStyles.Relative)));
             if (allDone)
                 desc = GetText(strs.dailies_done) + "\n" + desc;
 
