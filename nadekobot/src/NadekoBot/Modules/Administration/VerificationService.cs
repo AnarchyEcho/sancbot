@@ -587,7 +587,7 @@ public class VerificationService
             {wlcmRole.Mention}
             Please welcome {user.Mention} to the server! We hope you enjoy your stay with us!
             If you have any questions then please don't hesitate to ask!
-            And don't forget to grab some roles in {rolesChnl.Mention}{condi}!
+            And don't forget to grab some roles in {rolesChnl.Mention} and {rolesChnlNsfw.Mention}!
             """
         );
         await SubmitArchive(userId, adult, inter);
