@@ -9,16 +9,16 @@ public sealed class GiveFlowersQuest : IQuest
         => "Sharing is Caring";
 
     public string Desc
-        => "Give 20 flowers to someone";
+        => "Give 100 cookies to someone";
 
     public string ProgDesc
-        => "flowers given";
+        => "cookies given";
 
     public QuestEventType EventType
         => QuestEventType.Give;
 
     public long RequiredAmount
-        => 20;
+        => 100;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {

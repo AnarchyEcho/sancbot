@@ -4,9 +4,9 @@ public enum QuestIds
 {
     HangmanWin,
     Bet,
-    WaifuGift,
+    WaifuGift, // unused - waifu quest disabled, kept for enum ordinal stability (stored in DB)
     CatchFish,
-    SetPixels,
+    SetPixels, // unused - setpixels quest disabled, kept for enum ordinal stability (stored in DB)
     JoinAnimalRace,
     BankDeposit,
     CheckBetting,

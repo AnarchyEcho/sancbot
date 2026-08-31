@@ -6,13 +6,13 @@ public sealed class BetFlowersQuest : IQuest
 
     public string Name => "Cookies Gambler";
 
-    public string Desc => "Bet 300 cookies";
+    public string Desc => "Bet 1000 cookies";
 
-    public string ProgDesc => "flowers bet";
+    public string ProgDesc => "cookies bet";
 
     public QuestEventType EventType => QuestEventType.BetPlaced;
 
-    public long RequiredAmount => 300;
+    public long RequiredAmount => 1000;
 
     public long TryUpdateProgress(IDictionary<string, string> metadata, long oldProgress)
     {

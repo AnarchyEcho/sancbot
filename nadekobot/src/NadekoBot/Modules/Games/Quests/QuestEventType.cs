@@ -6,10 +6,10 @@ public enum QuestEventType
     GameWon,
     BetPlaced,
     FishCaught,
-    PixelSet,
+    PixelSet, // unused - setpixels quest disabled, kept for enum ordinal stability (stored in DB)
     RaceJoined,
     BankAction,
     PlantOrPick,
     Give,
-    WaifuGiftSent,
+    WaifuGiftSent, // unused - waifu quest disabled, kept for enum ordinal stability (stored in DB)
 }

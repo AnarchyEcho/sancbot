@@ -1,4 +1,4 @@
-#nullable disable
+﻿#nullable disable
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,7 +8,7 @@ public enum ShopEntryType
 {
     Role,
     List,
-    Command
+    Command,
 }
 
 public class ShopEntry : DbEntity, IIndexed
@@ -18,6 +18,7 @@ public class ShopEntry : DbEntity, IIndexed
     public int Index { get; set; }
     public int Price { get; set; }
     public string Name { get; set; }
+    public string Description { get; set; }
     public ulong AuthorId { get; set; }
 
     public ShopEntryType Type { get; set; }
@@ -30,7 +31,7 @@ public class ShopEntry : DbEntity, IIndexed
     public HashSet<ShopEntryItem> Items { get; set; } = new();
     public ulong? RoleRequirement { get; set; }
 
-    // command 
+    // command
     public string Command { get; set; }
 }
 
@@ -45,24 +46,15 @@ public class ShopEntryItem : DbEntity
         return ((ShopEntryItem)obj).Text == Text;
     }
 
-    public override int GetHashCode()
-        => Text.GetHashCode(StringComparison.InvariantCulture);
+    public override int GetHashCode() => Text.GetHashCode(StringComparison.InvariantCulture);
 }
 
 public class ShopEntryEntityConfiguration : IEntityTypeConfiguration<ShopEntry>
 {
     public void Configure(EntityTypeBuilder<ShopEntry> builder)
     {
-        builder.HasIndex(x => new
-               {
-                   x.GuildId,
-                   x.Index
-               })
-               .IsUnique();
+        builder.HasIndex(x => new { x.GuildId, x.Index }).IsUnique();
 
-        builder
-            .HasMany(x => x.Items)
-            .WithOne()
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(x => x.Items).WithOne().OnDelete(DeleteBehavior.Cascade);
     }
 }

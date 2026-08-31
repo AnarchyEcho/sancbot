@@ -18,21 +18,39 @@ public sealed class QuestService(
         new PlantPickQuest(),
         new BetQuest(),
         new BetFlowersQuest(),
+        new GiveFlowersQuest(),
         // new GiftWaifuQuest(),
         new CatchFishQuest(),
-        new SetPixelsQuest(),
+        // new SetPixelsQuest(),
         new JoinAnimalRaceQuest(),
         new BankerQuest(),
         new CheckLeaderboardsQuest(),
         new WellInformedQuest(),
     ];
 
-    private const int MAX_QUESTS_PER_DAY = 3;
+    private const int MAX_QUESTS_PER_WEEK = 3;
 
-    private TypedKey<bool> UserHasQuestsKey(ulong userId) => new($"daily:generated:{userId}");
+    private TypedKey<bool> UserHasQuestsKey(ulong userId) => new($"weekly:generated:{userId}");
 
     private TypedKey<bool> UserCompletedDailiesKey(ulong userId) =>
-        new($"daily:completed:{userId}");
+        new($"weekly:completed:{userId}");
+
+    /// <summary>
+    /// Returns the Monday (UTC) that starts the week containing <paramref name="date"/>.
+    /// Used as the stable "assignment date" for a whole week's quests.
+    /// </summary>
+    private static DateTime GetWeekStart(DateTime date)
+    {
+        var d = date.Date;
+        var diff = ((int)d.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        return d.AddDays(-diff);
+    }
+
+    /// <summary>
+    /// UTC time the current week's quests will reset and regenerate.
+    /// </summary>
+    public DateTime GetNextResetUtc(DateTime now)
+        => GetWeekStart(now).AddDays(7);
 
     public Task ReportActionAsync(
         ulong userId,
@@ -86,12 +104,12 @@ public sealed class QuestService(
 
                 if (userQuests.All(x => x.UserQuest.IsCompleted))
                 {
-                    var timeUntilTomorrow = now.Date.AddDays(1) - DateTime.UtcNow;
+                    var timeUntilNextWeek = GetNextResetUtc(now) - DateTime.UtcNow;
                     if (
                         !await botCache.AddAsync(
                             UserCompletedDailiesKey(userId),
                             true,
-                            expiry: timeUntilTomorrow
+                            expiry: timeUntilNextWeek
                         )
                     )
                         return;
@@ -119,12 +137,12 @@ public sealed class QuestService(
         DateTime now
     )
     {
-        var today = now.Date;
-        await EnsureUserDailiesAsync(userId, today);
+        var weekStart = GetWeekStart(now);
+        await EnsureUserWeekliesAsync(userId, weekStart);
 
         await using var uow = db.GetDbContext();
         var quests = await uow.GetTable<UserQuest>()
-            .Where(x => x.UserId == userId && x.DateAssigned == today)
+            .Where(x => x.UserId == userId && x.DateAssigned == weekStart)
             .ToListAsync();
 
         return quests
@@ -133,23 +151,22 @@ public sealed class QuestService(
             .ToList();
     }
 
-    private async Task EnsureUserDailiesAsync(ulong userId, DateTime date)
+    private async Task EnsureUserWeekliesAsync(ulong userId, DateTime weekStart)
     {
-        var today = date.Date;
-        var timeUntilTomorrow = today.AddDays(1) - DateTime.UtcNow;
+        var timeUntilNextWeek = weekStart.AddDays(7) - DateTime.UtcNow;
         if (
             !await botCache.AddAsync(
                 UserHasQuestsKey(userId),
                 true,
-                expiry: timeUntilTomorrow,
+                expiry: timeUntilNextWeek,
                 overwrite: false
             )
         )
             return;
 
         await using var uow = db.GetDbContext();
-        var newQuests = GenerateDailyQuestsAsync();
-        for (var i = 0; i < MAX_QUESTS_PER_DAY; i++)
+        var newQuests = GenerateWeeklyQuestsAsync();
+        for (var i = 0; i < MAX_QUESTS_PER_WEEK; i++)
         {
             await uow.GetTable<UserQuest>()
                 .InsertOrUpdateAsync(
@@ -158,7 +175,7 @@ public sealed class QuestService(
                         {
                             UserId = userId,
                             QuestNumber = i,
-                            DateAssigned = today,
+                            DateAssigned = weekStart,
 
                             IsCompleted = false,
                             QuestId = newQuests[i].QuestId,
@@ -170,15 +187,15 @@ public sealed class QuestService(
                         {
                             UserId = userId,
                             QuestNumber = i,
-                            DateAssigned = today,
+                            DateAssigned = weekStart,
                         }
                 );
         }
     }
 
-    private IReadOnlyList<IQuest> GenerateDailyQuestsAsync()
+    private IReadOnlyList<IQuest> GenerateWeeklyQuestsAsync()
     {
-        return _availableQuests.ToList().Shuffle().Take(MAX_QUESTS_PER_DAY).ToList();
+        return _availableQuests.ToList().Shuffle().Take(MAX_QUESTS_PER_WEEK).ToList();
     }
 
     public int Priority => int.MinValue;

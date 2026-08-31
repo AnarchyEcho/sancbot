@@ -47,10 +47,17 @@ public sealed class FishService(
     private static TypedKey<bool> FishingKey(ulong userId)
         => new($"fishing:{userId}");
 
+    // clamp to 0, not for balance but because Task.Delay/TimeSpan.FromSeconds
+    // throw on a negative duration if stacked speed bonuses exceed 100%
     public async Task<OneOf.OneOf<Task<FishOutcome>, AlreadyFishing>> FishAsync(ulong userId, ulong channelId,
         FishMultipliers multipliers)
     {
-        var duration = _rng.Next(3, 6) / multipliers.FishingSpeedMultiplier;
+        var baseDuration = _rng.Next(9, 12);
+
+        // FishingSpeedMultiplier of 1.8 (e.g. Motorboat) means "80% faster" -
+        // subtract that fraction of the base time directly. Can reach 0 (instant).
+        var speedBonus = multipliers.FishingSpeedMultiplier - 1;
+        var duration = Math.Max(0, baseDuration * (1 - speedBonus));
 
         if (!await cache.AddAsync(FishingKey(userId), true, TimeSpan.FromSeconds(duration), overwrite: false))
         {

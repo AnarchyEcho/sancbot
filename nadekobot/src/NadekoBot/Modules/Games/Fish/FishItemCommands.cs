@@ -31,7 +31,7 @@ public partial class Games
                     return CreateEmbed()
                         .WithTitle(GetText(strs.fish_items_title))
                         .WithDescription(sb.ToString().TrimEnd())
-                        .WithFooter("Use .fibuy <id> to purchase")
+                        .WithFooter("Use !fibuy <id> to purchase")
                         .WithOkColor();
                 })
                 .AddFooter(false)
@@ -315,7 +315,7 @@ public partial class Games
                         .WithAuthor(ctx.User)
                         .WithTitle(GetText(strs.fish_inv_title))
                         .WithDescription(sb.ToString().TrimEnd())
-                        .WithFooter("Use .fiuse <num> to equip an item")
+                        .WithFooter("Use !fiuse <num> to equip an item")
                         .WithOkColor();
                 })
                 .AddFooter(false)

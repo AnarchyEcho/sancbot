@@ -131,7 +131,12 @@ public sealed partial class FeedsService : INService, IReadyExecutor
     /// <summary>
     /// Builds an embed from a parsed feed item, extracting title, description, link, and thumbnail.
     /// </summary>
-    public static EmbedBuilder BuildFeedEmbed(EmbedBuilder embed, FeedItem feedItem, string rssUrl)
+    public static EmbedBuilder BuildFeedEmbed(
+        EmbedBuilder embed,
+        FeedItem feedItem,
+        string rssUrl,
+        out bool hasImage
+    )
     {
         bool galleryImages = false;
         var link = feedItem.SpecificItem.Link;
@@ -171,41 +176,43 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                     .FirstOrDefault(x => x.Name.LocalName == "thumbnail");
             }
 
-            if (previewElement != null && previewElement.ToString().Contains("thumbs"))
-            {
-                galleryImages = true;
-                Console.WriteLine("custom reddit shit happens");
-                string galleryLink =
-                    $"https://www.reddit.com/gallery/{Regex.Match(link, @"(?<=comments/)\w+").Value}";
-                using HttpClient client = new();
-                client.DefaultRequestHeaders.Add("User-Agent", "C# Discord Bot");
-                using HttpResponseMessage response = client.GetAsync(galleryLink).Result;
-                using HttpContent content = response.Content;
-                string result = content.ReadAsStringAsync().Result;
-                MatchCollection galleryRegexTest = Regex.Matches(
-                    result,
-                    @"(?<=a href=.)[A-z0-9:/.?=&;]+(?<!\W)"
-                );
-                int i = 1;
-                foreach (Match x in galleryRegexTest)
-                {
-                    string newTitle = $"{title} {i}/{galleryRegexTest.Count}";
-                    embed.WithTitle(newTitle.TrimTo(256));
-                    if (!x.Value.Contains("external"))
-                    {
-                        embed.WithImageUrl(x.Value.Replace("preview", "i"));
-                    }
-                    else
-                    {
-                        embed.WithImageUrl(x.Value);
-                    }
-
-                    string description = feedItem.Description.StripHtml();
-                    if (!string.IsNullOrWhiteSpace(feedItem.Description))
-                        embed.WithDescription(description.TrimTo(2048));
-                    i++;
-                }
-            }
+            // Albums broken for now so commented out
+            //
+            // if (previewElement != null && previewElement.ToString().Contains("thumbs"))
+            // {
+            //     galleryImages = true;
+            //     Console.WriteLine("custom reddit shit happens");
+            //     string galleryLink =
+            //         $"https://www.reddit.com/gallery/{Regex.Match(link, @"(?<=comments/)\w+").Value}";
+            //     using HttpClient client = new();
+            //     client.DefaultRequestHeaders.Add("User-Agent", "C# Discord Bot");
+            //     using HttpResponseMessage response = client.GetAsync(galleryLink).Result;
+            //     using HttpContent content = response.Content;
+            //     string result = content.ReadAsStringAsync().Result;
+            //     MatchCollection galleryRegexTest = Regex.Matches(
+            //         result,
+            //         @"(?<=a href=.)[A-z0-9:/.?=&;]+(?<!\W)"
+            //     );
+            //     int i = 1;
+            //     foreach (Match x in galleryRegexTest)
+            //     {
+            //         string newTitle = $"{title} {i}/{galleryRegexTest.Count}";
+            //         embed.WithTitle(newTitle.TrimTo(256));
+            //         if (!x.Value.Contains("external"))
+            //         {
+            //             embed.WithImageUrl(x.Value.Replace("preview", "i"));
+            //         }
+            //         else
+            //         {
+            //             embed.WithImageUrl(x.Value);
+            //         }
+            //
+            //         string description = feedItem.Description.StripHtml();
+            //         if (!string.IsNullOrWhiteSpace(feedItem.Description))
+            //             embed.WithDescription(description.TrimTo(2048));
+            //         i++;
+            //     }
+            // }
             if (previewElement != null && !galleryImages)
             {
                 var urlAttribute = previewElement.Attribute("url");
@@ -270,6 +277,8 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         var desc = feedItem.Description?.StripHtml();
         if (!string.IsNullOrWhiteSpace(feedItem.Description))
             embed.WithDescription(desc.TrimTo(2048));
+
+        hasImage = gotImage;
         return embed;
     }
 
@@ -331,9 +340,15 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                         if (itemUpdateDate <= lastFeedUpdate)
                             continue;
 
-                        var embed = BuildFeedEmbed(_sender.CreateEmbed(), feedItem, rssUrl);
+                        var embed = BuildFeedEmbed(_sender.CreateEmbed(), feedItem, rssUrl, out var hasImage);
 
                         _lastPosts[kvp.Key] = itemUpdateDate;
+
+                        // Skip text-only posts (e.g. questions, discussions) that have no
+                        // image/media attached - still counts as "seen" above so it won't
+                        // be picked up again on the next poll.
+                        if (!hasImage)
+                            continue;
 
                         var tasks = new List<Task>();
 
