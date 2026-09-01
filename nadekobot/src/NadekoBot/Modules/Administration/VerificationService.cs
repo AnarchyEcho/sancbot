@@ -352,7 +352,7 @@ public class VerificationService
                     new SelectMenuOptionBuilder(label: "Duplicate", value: "Duplicate"),
                     new SelectMenuOptionBuilder(
                         label: "Incorrect Password",
-                        value: "Wrong password. Please check rule 7 in the Welcome Rules for the correct one."
+                        value: "Wrong password. Please check rule 3 in the Welcome Rules for the correct one."
                     ),
                     new SelectMenuOptionBuilder(
                         label: "Incorrect Server Invite Source",
@@ -574,14 +574,14 @@ public class VerificationService
         var wlcmRole = guild.GetRole(welcomeRoleId);
         string condi = adult ? $" and {rolesChnlNsfw.Mention}" : "";
 
-        if (adult)
-        {
-            await user.AddRolesAsync([verifiedRoleId, verifiedNsfwRoleId]);
-        }
-        else
-        {
-            await user.AddRoleAsync(verifiedRoleId);
-        }
+        // if (adult)
+        // {
+        await user.AddRolesAsync([verifiedRoleId, verifiedNsfwRoleId]);
+        // }
+        // else
+        // {
+        //     await user.AddRoleAsync(verifiedRoleId);
+        // }
         await wlcmchnl.SendMessageAsync(
             $"""
             {wlcmRole.Mention}
