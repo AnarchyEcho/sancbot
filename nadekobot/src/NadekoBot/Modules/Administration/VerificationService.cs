@@ -366,6 +366,10 @@ public class VerificationService
                         label: "Too little info",
                         value: "Please provide more information."
                     ),
+                    new SelectMenuOptionBuilder(
+                        label: "Under 18",
+                        value: "You must be an adult to join this server. We recommend you join here instead: https://discord.gg/floofs"
+                    ),
                 ]
             );
             pendingMessage.WithActionRow(actionRowTwo);
