@@ -47,7 +47,40 @@ dmHelpTextKeywords:
   - can you do
 # This is the response for the .h command
 helpText: |-
-  Commands can be found at: https://nadeko.bot/commands
+  # 📜 SERVER GUIDE & INFORMATION
+
+  Welcome to the server! Below you'll find everything you need to know about our economy, bot commands, booster perks, community voting, and server features.
+
+  ## 🍪 ECONOMY
+
+  Earn cookies 🍪 **by chatting**, using `!work`, fishing in <#1543834544099164171> (check pins), gambling in <#757552954596261888>, or winning events! Spend them in the `!shop` for custom roles, perks, or Nitro. You can check your cookie 🍪 balance by using `!bal`.
+
+  ## 💎 BOOSTING & VIP
+
+  Boosting unlocks better audio quality, larger file uploads, exclusive server perks for you, and the possibility for the server to rent game servers!
+
+  ✨ **VIP Perks:**
+  • Access to exclusive colors in <#758192874503274497>
+  • **+50 bonus 🍪** daily
+  • **+50% extra 🍪** from `!work`
+
+  *(Buying the 💳 VIP role in `!shop` awards these same benefits!)*
+
+  ## 🗳️ VOTING & DEMOCRACY
+
+  Help shape the server! Vote on ideas in <#1195432098715152485> and discuss them in <#1195432501833912361>. Grab the voter role in <#879490219785732117> if you would like to be pinged for votes. Voting requires you to have been fully verified *(Which you become once you hit Level 2. You can check your level with (`!xp`)*.
+
+  ## ❓ FREQUENTLY ASKED QUESTIONS
+
+  ❓ **Why can't I share links, post images, or join VC?**
+  > You must reach **Level 2** (seen with `!xp`) to receive the **Verified Fur!** role which unlocks media/VC access. Artists can open a ticket in <#1079547118018117686> for early verification to advertise.
+
+  ❓ **How do I sell a shop role?**
+  > Type `!sell <shop_number>` (e.g., `!sell 3`) in <#757552954596261888> for a **75% refund**.
+  > `!Fishshop` items are non-refundable.
+
+  <@766443756903596043> is a modded version of NadekoBot, whose commands you can find below (we use `!` as a command prefix, not `.` ) :
+  https://nadeko.bot/commands
 # List of modules and commands completely blocked on the bot
 blocked:
   commands: []

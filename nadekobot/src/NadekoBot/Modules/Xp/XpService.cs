@@ -264,6 +264,12 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                     NotifyUser(u.GuildId, data.ChannelId, u.UserId, oldStats.Level, newStats.Level)
                 );
             }
+            else if (newStats.Level == 0)
+            {
+                // user gained xp but is still at level 0 - make sure they have
+                // the level 0 role, if one is configured for this guild
+                await _levelUpQueue.EnqueueAsync(EnsureLevel0Role(u.GuildId, u.UserId));
+            }
         }
     }
 
@@ -281,6 +287,42 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
             await HandleNotifyInternalAsync(guildId, channelId, userId, newLevel);
         };
 
+    private Func<Task> EnsureLevel0Role(ulong guildId, ulong userId) =>
+        async () => await EnsureLevel0RoleInternalAsync(guildId, userId);
+
+    private async Task EnsureLevel0RoleInternalAsync(ulong guildId, ulong userId)
+    {
+        var settings = await GetFullXpSettingsFor(guildId);
+        if (settings.Level0RoleId is not { } roleId)
+            return;
+
+        var guild = _client.GetGuild(guildId);
+        var role = guild?.GetRole(roleId);
+        var user = guild?.GetUser(userId);
+
+        if (role is null || user is null)
+            return;
+
+        // already has it, nothing to do - avoids hitting the API on every xp gain
+        if (user.Roles.Any(r => r.Id == roleId))
+            return;
+
+        try
+        {
+            await user.AddRoleAsync(role);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(
+                ex,
+                "Unable to add level 0 role {RoleId} to user {UserId}: {Message}",
+                roleId,
+                userId,
+                ex.Message
+            );
+        }
+    }
+
     private async Task HandleRewardsInternalAsync(
         ulong guildId,
         ulong userId,
@@ -291,6 +333,33 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
         var settings = await GetFullXpSettingsFor(guildId);
         var rrews = settings.RoleRewards;
         var crews = settings.CurrencyRewards;
+
+        // user is leaving level 0 behind - hand off from the level 0 role to
+        // whatever level 1+ role rewards apply below, same as before.
+        if (oldLevel == 0 && settings.Level0RoleId is { } level0RoleId)
+        {
+            var guild0 = _client.GetGuild(guildId);
+            var role0 = guild0?.GetRole(level0RoleId);
+            var user0 = guild0?.GetUser(userId);
+
+            if (role0 is not null && user0 is not null && user0.Roles.Any(r => r.Id == level0RoleId))
+            {
+                try
+                {
+                    await user0.RemoveRoleAsync(role0);
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(
+                        ex,
+                        "Unable to remove level 0 role {RoleId} from user {UserId}: {Message}",
+                        level0RoleId,
+                        userId,
+                        ex.Message
+                    );
+                }
+            }
+        }
 
         //loop through levels since last level up, so if a high amount of xp is gained, reward are still applied.
         for (var i = oldLevel + 1; i <= newLevel; i++)
@@ -418,6 +487,20 @@ public class XpService : INService, IReadyExecutor, IExecNoCommand
                 settings.CurrencyRewards.Add(new() { Level = level, Amount = amount });
             }
         }
+
+        await uow.SaveChangesAsync();
+    }
+
+    /// <summary>
+    ///     Sets (or clears, if roleId is null) the role given to users the moment
+    ///     they earn any xp while still at level 0.
+    /// </summary>
+    public async Task SetLevel0RoleAsync(ulong guildId, ulong? roleId)
+    {
+        await using var uow = _db.GetDbContext();
+        var settings = await uow.XpSettingsFor(guildId);
+
+        settings.Level0RoleId = roleId;
 
         await uow.SaveChangesAsync();
     }

@@ -1,7 +1,7 @@
 # DO NOT CHANGE
 version: 3
 # Whether the patronage feature is enabled
-isEnabled: false
+isEnabled: true
 # Quotas for patron system
 quotas:
   None: 

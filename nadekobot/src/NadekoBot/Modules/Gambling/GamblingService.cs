@@ -248,28 +248,32 @@ public class GamblingService : INService, IReadyExecutor
         var msg = $"**{N(baseAmount)}** base reward\n\n";
         if (boostGuilds.Count > 0)
         {
+            // Sanitize the guild name - if it contains markdown chars like * or _,
+            // interpolating it raw inside *italics* breaks the formatting.
+            var safeGuildName = Format.Sanitize(userInfo.guild?.Name ?? "");
+
             if (booster)
-                msg += $"✅ *+{N(gcsData.BoostBonus.BaseTimelyBonus)} bonus for boosting {userInfo.guild}!*\n";
+                msg += $"✅ *+{N(gcsData.BoostBonus.BaseTimelyBonus)} bonus for boosting {safeGuildName}!*\n";
             else
-                msg += $"❌ *+0 bonus for boosting {userInfo.guild}*\n";
+                msg += $"❌ *+0 bonus for boosting {safeGuildName}*\n";
         }
 
         if (_ps.GetConfig().IsEnabled)
         {
             if (percentBonus > float.Epsilon)
                 msg +=
-                    $"✅ *+{percentBonus:P0} bonus for the [Patreon](https://patreon.com/nadekobot) pledge! <:hart:746995901758832712>*\n";
+                    $"✅ *+{percentBonus:P0} bonus for the [Patreon](https://patreon.com/TheFurrySanctuary) pledge! <:BCatHeartlove:805524754907136030> *\n";
             else
-                msg += $"❌ *+0 bonus for the [Patreon](https://patreon.com/nadekobot) pledge*\n";
+                msg += $"❌ *+0 bonus for the [Patreon](https://patreon.com/TheFurrySanctuary) pledge*\n";
         }
 
         if (hasCompletedDailies)
         {
-            msg += $"✅ *+50% bonus for completing daily quests*\n";
+            msg += $"✅ *+50% bonus for completing weekly quests!*\n";
         }
         else
         {
-            msg += $"❌ *+0 bonus for completing daily quests*\n";
+            msg += $"❌ *+0 bonus for completing weekly quests!*\n";
         }
 
 

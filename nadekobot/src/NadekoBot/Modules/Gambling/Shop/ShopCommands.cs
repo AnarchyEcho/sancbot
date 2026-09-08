@@ -338,6 +338,80 @@ public partial class Gambling
             }
         }
 
+        private const decimal SELL_BACK_PERCENT = 0.75m;
+
+        private long GetSellBackAmount(int price) =>
+            (long)Math.Floor(price * SELL_BACK_PERCENT);
+
+        [Cmd]
+        [RequireContext(ContextType.Guild)]
+        public async Task Sell(int index)
+        {
+            index -= 1;
+            if (index < 0)
+                return;
+
+            ShopEntry entry;
+            await using (var uow = _db.GetDbContext())
+            {
+                entry = await uow.Set<ShopEntry>()
+                    .Where(x => x.GuildId == ctx.Guild.Id)
+                    .Include(x => x.Items)
+                    .OrderBy(x => x.Id)
+                    .Skip(index)
+                    .FirstOrDefaultAsync();
+            }
+
+            if (entry is null)
+            {
+                await Response().Error(strs.shop_item_not_found).SendAsync();
+                return;
+            }
+
+            if (entry.Type != ShopEntryType.Role)
+            {
+                await Response().Error(strs.shop_sell_wrong_type).SendAsync();
+                return;
+            }
+
+            var guser = (IGuildUser)ctx.User;
+            var role = ctx.Guild.GetRole(entry.RoleId);
+
+            if (role is null)
+            {
+                await Response().Error(strs.shop_role_not_found).SendAsync();
+                return;
+            }
+
+            if (!guser.RoleIds.Contains(role.Id))
+            {
+                await Response().Error(strs.shop_sell_not_owned(Format.Bold(role.Name))).SendAsync();
+                return;
+            }
+
+            try
+            {
+                await guser.RemoveRoleAsync(role);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Error removing shop role on sell-back");
+                await Response().Error(strs.shop_sell_error).SendAsync();
+                return;
+            }
+
+            var refund = GetSellBackAmount(entry.Price);
+            await _cs.AddAsync(
+                ctx.User.Id,
+                refund,
+                new("shop", "sell-back", entry.Name)
+            );
+
+            await Response()
+                .Confirm(strs.shop_sell_success(Format.Bold(role.Name), N(refund)))
+                .SendAsync();
+        }
+
         private long GetProfitAmount(int price) =>
             (int)Math.Ceiling((1.0m - Config.BotCuts.ShopSaleCut) * price);
 

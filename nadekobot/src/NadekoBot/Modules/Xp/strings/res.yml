@@ -36,3 +36,5 @@ xpt_rank: Rank
 xpt_progress: Progress
 xpt_total_xp: Total XP
 xpt_club: Club
+xp_zero_role_cleared: Level 0 role cleared.
+xp_zero_role_set: Level 0 role set to {0}.

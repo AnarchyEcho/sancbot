@@ -27,5 +27,9 @@ shop_role_already_bought: You already bought this role.
 shop_role_not_found: Role which is being sold no longer exists.
 shop_role_purchase: You've successfully purchased {0} role.
 shop_role_purchase_error: Error assigning role. Your purchase has been refunded.
+shop_sell_error: Error removing that role. Please try again.
+shop_sell_not_owned: You don't have the {0} role, so it can't be sold back.
+shop_sell_success: 'Sold back {0} role for {1}.'
+shop_sell_wrong_type: That shop item can't be sold back - only roles can be.
 type: Type
 unique_items_left: '{0} unique items left.'

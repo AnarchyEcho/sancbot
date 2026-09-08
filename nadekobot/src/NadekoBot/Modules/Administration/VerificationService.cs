@@ -368,7 +368,7 @@ public class VerificationService
                     ),
                     new SelectMenuOptionBuilder(
                         label: "Under 18",
-                        value: "You must be an adult to join this server. We recommend you join here instead: https://discord.gg/floofs"
+                        value: "You must be an adult to join. We recommend you join here instead: https://discord.gg/floofs"
                     ),
                 ]
             );

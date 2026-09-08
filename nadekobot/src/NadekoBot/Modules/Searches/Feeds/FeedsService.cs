@@ -28,6 +28,8 @@ public sealed partial class FeedsService : INService, IReadyExecutor
 
     private readonly NonBlocking.ConcurrentDictionary<string, DateTime> _lastPosts = new();
     private readonly Dictionary<string, uint> _errorCounters = new();
+    private readonly NonBlocking.ConcurrentDictionary<string, DateTime> _nextAllowedCheck = new();
+    private readonly NadekoRandom _rng = new();
 
     public FeedsService(
         DbService db,
@@ -68,7 +70,11 @@ public sealed partial class FeedsService : INService, IReadyExecutor
         await TrackFeeds();
     }
 
-    private void ClearErrors(string url) => _errorCounters.Remove(url);
+    private void ClearErrors(string url)
+    {
+        _errorCounters.Remove(url);
+        _nextAllowedCheck.TryRemove(url, out _);
+    }
 
     private async Task<uint> AddError(string url, List<FeedSub> subs)
     {
@@ -293,6 +299,13 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                     continue;
 
                 var rssUrl = kvp.Value.First().Url;
+
+                if (_nextAllowedCheck.TryGetValue(rssUrl, out var nextAllowed)
+                    && DateTime.UtcNow < nextAllowed)
+                {
+                    continue;
+                }
+
                 try
                 {
                     var feedTask = FeedReader.ReadAsync(rssUrl, userAgent: USER_AGENT);
@@ -421,6 +434,12 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                 {
                     var errorCount = await AddError(rssUrl, kvp.Value);
 
+                    // Exponential backoff: 30s * 2^errors, capped at 1 hour, so a feed
+                    // that's failing (e.g. getting rate-limited) backs off instead of
+                    // getting hammered again every single 30s pass.
+                    var backoffSeconds = Math.Min(30 * Math.Pow(2, errorCount), 3600);
+                    _nextAllowedCheck[rssUrl] = DateTime.UtcNow.AddSeconds(backoffSeconds);
+
                     Log.Debug(
                         "An error occured while getting rss stream ({ErrorCount} / {MaxErrors}) {RssFeed}"
                             + "\n {Message}",
@@ -430,9 +449,13 @@ public sealed partial class FeedsService : INService, IReadyExecutor
                         $"[{ex.GetType().Name}]: {ex.Message}"
                     );
                 }
+
+                // small jitter between feed checks so feeds sharing a host (e.g.
+                // several Reddit feeds) don't all fire in the same instant
+                await Task.Delay(TimeSpan.FromMilliseconds(300 + _rng.Next(0, 400)));
             }
 
-            await Task.WhenAll(Task.WhenAll(allSendTasks), Task.Delay(30000));
+            await Task.WhenAll(Task.WhenAll(allSendTasks), Task.Delay(TimeSpan.FromMinutes(5)));
         }
     }
 

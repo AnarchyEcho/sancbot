@@ -50,6 +50,14 @@ shopadd:
         desc: The cost at which the role is available for purchase.
       name:
         desc: The name of the role, command, or list being added to the shop.
+sell:
+  desc: |-
+    Sells back a role you purchased from the shop at the given index, refunding 75% of the item's current price and removing the role from you.
+  ex:
+    - 2
+  params:
+    - index:
+        desc: The index of the role item in the shop to sell back.
 shopchangename:
   desc: |-
     Change the name of a shop entry at the specified index. Only works for non-role items

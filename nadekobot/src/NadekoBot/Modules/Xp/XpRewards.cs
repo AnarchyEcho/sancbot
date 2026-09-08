@@ -11,6 +11,26 @@ public partial class Xp
         public XpRewards(ICurrencyProvider cp) => _cp = cp;
 
         [Cmd]
+        [UserPerm(GuildPerm.Administrator)]
+        [BotPerm(GuildPerm.ManageRoles)]
+        [RequireContext(ContextType.Guild)]
+        public async Task XpZeroRole([Leftover] IRole? role = null)
+        {
+            await _service.SetLevel0RoleAsync(ctx.Guild.Id, role?.Id);
+
+            if (role is null)
+            {
+                await Response().Confirm(strs.xp_zero_role_cleared).SendAsync();
+            }
+            else
+            {
+                await Response()
+                    .Confirm(strs.xp_zero_role_set(Format.Bold(role.ToString())))
+                    .SendAsync();
+            }
+        }
+
+        [Cmd]
         [RequireContext(ContextType.Guild)]
         [UserPerm(GuildPerm.Administrator)]
         public async Task XpRewsReset()

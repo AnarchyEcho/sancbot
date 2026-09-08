@@ -2529,6 +2529,9 @@ namespace NadekoBot.Migrations
                     b.Property<ulong>("GuildId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<ulong?>("Level0RoleId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("XpFormulaA")
                         .HasColumnType("INTEGER");
 

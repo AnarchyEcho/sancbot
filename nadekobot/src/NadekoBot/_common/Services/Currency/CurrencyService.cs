@@ -142,25 +142,7 @@ public sealed class CurrencyService(DbService db, ITxTracker txTracker) : ICurre
 
         var extra = new TxData("gift", from.ToString()!, note, from.Id);
 
-        if (await fromWallet.Transfer(amount, toWallet, extra))
-        {
-            try
-            {
-                await sender.Response(to)
-                    .Confirm(string.IsNullOrWhiteSpace(note)
-                        ? $"Received {formattedAmount} from {from} "
-                        : $"Received {formattedAmount} from {from}: {note}")
-                    .SendAsync();
-            }
-            catch
-            {
-                //ignored
-            }
-
-            return true;
-        }
-
-        return false;
+        return await fromWallet.Transfer(amount, toWallet, extra);
     }
 
     public async Task<long> GetBalanceAsync(ulong userId)

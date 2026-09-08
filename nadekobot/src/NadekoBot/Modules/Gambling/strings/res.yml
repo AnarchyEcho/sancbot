@@ -17,23 +17,23 @@ raffled_user: Raffled user
 rakeback_available: You have {0} rakeback available. Click the button to claim.
 rakeback_claimed: You've claimed {0} as rakeback!
 rakeback_none: You don't have any rakeback to claim yet.
-remind_timely: I will remind you about your timely reward {0}
+remind_timely: I will remind you when you can work again {0}
 roll2: Roll
 rps_draw: It's a draw! Both picked {0}
 rps_win: '{0} won! {1} beats {2}'
 take: successfully took {0} from {1}
 take_fail: was unable to take {0} from {1} because the user doesn't have that much {2}!
 test_results_for: Test results for {0}
-timely: You've claimed your {0}. You can claim again in {1}h
-timely_already_claimed: You've already claimed your timely reward. You can get it again {0}.
+timely: You've claimed your {0}. You can !work again in {1}h
+timely_already_claimed: You've already worked. You can !work again {0}.
 timely_button: Click the button to claim your timely reward.
-timely_none: Bot owner didn't specify a timely reward.
-timely_reset: All users will be able to claim timely currency again.
-timely_set: Users will be able to claim {0} every {1}h
-timely_set_none: Users will not be able to claim any timely currency.
-timely_time: It's time for your timely reward.
+timely_none: Bot owner didn't specify a work reward.
+timely_reset: All users will be able to work again.
+timely_set: Users will be able to work {0} every {1}h
+timely_set_none: Users will not be able to work.
+timely_time: It's time to work!
 transaction: Currency Transaction
 transactions: Transactions of user {0}
-vote_suggest: Voting for the bot will get you {0}!
+vote_suggest: Voting for the server will get you {0}!
 winlb: Biggest Wins Leaderboard
 won: Won

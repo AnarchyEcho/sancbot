@@ -5,7 +5,6 @@ namespace NadekoBot.Modules.Help;
 
 public partial class Help
 {
-    [OnlyPublicBot]
     public partial class Patronage : NadekoModule
     {
         private readonly PatronageService _service;

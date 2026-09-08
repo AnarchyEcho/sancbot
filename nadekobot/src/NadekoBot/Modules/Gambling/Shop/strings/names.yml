@@ -1,6 +1,9 @@
 buy:
   - shopbuy
   - buy
+sell:
+  - shopsell
+  - sell
 shop:
   - shop
 shopadd:

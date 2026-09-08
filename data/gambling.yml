@@ -77,7 +77,7 @@ botCuts:
   # The rest goes to the user who posted the item/role/whatever to the shop.
   # This is a good way to reduce the amount of currency in circulation therefore keeping the inflation in check.
   # Default 0.1 (10%).
-  shopSaleCut: 0.1
+  shopSaleCut: 1
 # Settings for LuckyLadder command
 luckyLadder:
   # Self-Explanatory. Has to have 8 values, otherwise the command won't work.
@@ -249,16 +249,16 @@ waifu:
       name: Moon
 # Amount of currency selfhosters will get PER pledged dollar CENT.
 # 1 = 100 currency per $. Used almost exclusively on public nadeko.
-patreonCurrencyPerCent: 1
+patreonCurrencyPerCent: 5
 # Currency reward per vote.
 # This will work only if you've set up VotesApi and correct credentials for topgg and/or discords voting
-voteReward: 0
+voteReward: 50
 # Id of the channel to send a message to after a user votes
-voteFeedChannelId:
+voteFeedChannelId: 757534268434939974
 votePlatforms:
   - Top.gg|https://top.gg/bot/YOUR_BOT_ID/vote
   - DiscordBotList|https://discordsbotlist.com/bot/YOUR_BOT_ID/vote
-  - Discords|https://discords.com/bot/YOUR_BOT_ID/vote
+  - Discords|https://discords.com/servers/744627531587780739/upvote
 # Slot config
 slots:
   # Hex value of the color which the numbers on the slot image will have.
