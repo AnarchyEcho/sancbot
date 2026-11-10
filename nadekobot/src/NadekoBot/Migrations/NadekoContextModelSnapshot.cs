@@ -401,6 +401,91 @@ namespace NadekoBot.Migrations
                     b.ToTable("BankUsers");
                 });
 
+            modelBuilder.Entity("NadekoBot.Db.Models.Bet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BetOptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BetOptionId");
+
+                    b.ToTable("Bet");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.BetEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ChannelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CreatorId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LockAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<ulong>("MessageId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Question")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("WinningOptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BetEvents");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.BetOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BetEventId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Label")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BetEventId");
+
+                    b.ToTable("BetOption");
+                });
+
             modelBuilder.Entity("NadekoBot.Db.Models.BlacklistEntry", b =>
                 {
                     b.Property<int>("Id")
@@ -730,6 +815,32 @@ namespace NadekoBot.Migrations
                     b.HasIndex("Username");
 
                     b.ToTable("DiscordUser");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.EatenCurrency", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DateAdded")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("EatenAmount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("EatenCurrency");
                 });
 
             modelBuilder.Entity("NadekoBot.Db.Models.FeedSub", b =>
@@ -3257,6 +3368,28 @@ namespace NadekoBot.Migrations
                     b.Navigation("Channel");
                 });
 
+            modelBuilder.Entity("NadekoBot.Db.Models.Bet", b =>
+                {
+                    b.HasOne("NadekoBot.Db.Models.BetOption", "BetOption")
+                        .WithMany("Bets")
+                        .HasForeignKey("BetOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BetOption");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.BetOption", b =>
+                {
+                    b.HasOne("NadekoBot.Db.Models.BetEvent", "BetEvent")
+                        .WithMany("Options")
+                        .HasForeignKey("BetEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BetEvent");
+                });
+
             modelBuilder.Entity("NadekoBot.Db.Models.ClubApplicants", b =>
                 {
                     b.HasOne("NadekoBot.Db.Models.ClubInfo", "Club")
@@ -3445,6 +3578,16 @@ namespace NadekoBot.Migrations
             modelBuilder.Entity("NadekoBot.Db.Models.AutoTranslateChannel", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.BetEvent", b =>
+                {
+                    b.Navigation("Options");
+                });
+
+            modelBuilder.Entity("NadekoBot.Db.Models.BetOption", b =>
+                {
+                    b.Navigation("Bets");
                 });
 
             modelBuilder.Entity("NadekoBot.Db.Models.ClubInfo", b =>

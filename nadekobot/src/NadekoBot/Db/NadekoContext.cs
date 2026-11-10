@@ -80,6 +80,7 @@ public sealed class NadekoContext : DbContext
     public DbSet<TodoModel> Todos { get; set; }
     public DbSet<ArchivedTodoListModel> TodosArchive { get; set; }
     public DbSet<HoneypotChannel> HoneyPotChannels { get; set; }
+    public DbSet<BetEvent> BetEvents { get; set; }
 
 
     // public DbSet<GuildColors> GuildColors { get; set; }

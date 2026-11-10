@@ -106,7 +106,9 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-all")]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-all")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-all")]
         [BotPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
         [Priority(0)]
         public Task Mute(IGuildUser target, [Leftover] string reason = "")
@@ -117,7 +119,9 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-all")]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-all")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-all")]
         [BotPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
         [Priority(1)]
         public Task Mute(ParsedTimespan timespan, IGuildUser user, [Leftover] string reason = "")
@@ -129,7 +133,9 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-all")]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-all")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-all")]
         [BotPerm(GuildPerm.ManageRoles | GuildPerm.MuteMembers)]
         public Task Unmute(IGuildUser user, [Leftover] string reason = "")
             => UnmuteInternalAsync(user,
@@ -139,7 +145,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-chat")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-chat")]
         [BotPerm(GuildPerm.ManageRoles)]
         [Priority(0)]
         public Task ChatMute(IGuildUser user, [Leftover] string reason = "")
@@ -150,7 +157,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-chat")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-chat")]
         [BotPerm(GuildPerm.ManageRoles)]
         [Priority(1)]
         public Task ChatMute(ParsedTimespan timespan, IGuildUser user, [Leftover] string reason = "")
@@ -162,7 +170,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.ManageRoles)]
+        [UserPerm(GuildPerm.ManageRoles, Group = "mute-chat")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-chat")]
         [BotPerm(GuildPerm.ManageRoles)]
         public Task ChatUnmute(IGuildUser user, [Leftover] string reason = "")
             => UnmuteInternalAsync(user,
@@ -172,7 +181,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-voice")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-voice")]
         [BotPerm(GuildPerm.MuteMembers)]
         [Priority(0)]
         public Task VoiceMute(IGuildUser user, [Leftover] string reason = "")
@@ -183,7 +193,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-voice")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-voice")]
         [BotPerm(GuildPerm.MuteMembers)]
         [Priority(1)]
         public Task VoiceMute(ParsedTimespan timespan, IGuildUser user, [Leftover] string reason = "")
@@ -195,7 +206,8 @@ public partial class Administration
 
         [Cmd]
         [RequireContext(ContextType.Guild)]
-        [UserPerm(GuildPerm.MuteMembers)]
+        [UserPerm(GuildPerm.MuteMembers, Group = "mute-voice")]
+        [UserPerm(GuildPerm.ModerateMembers, Group = "mute-voice")]
         [BotPerm(GuildPerm.MuteMembers)]
         public Task VoiceUnmute(IGuildUser user, [Leftover] string reason = "")
             => UnmuteInternalAsync(user,

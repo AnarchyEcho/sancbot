@@ -101,7 +101,7 @@ public partial class Gambling : GamblingModule<GamblingService>
             ctx.Guild?.Id,
             true,
             when,
-            GetText(strs.timely_time),
+            GetText(strs.timely_time) + " <#757552954596261888>",
             ReminderType.Timely);
 
         await smc.RespondConfirmAsync(_sender, GetText(strs.remind_timely(tt)), ephemeral: true);
@@ -706,6 +706,58 @@ public partial class Gambling : GamblingModule<GamblingService>
     [Priority(1)]
     public Task Give([OverrideTypeReader(typeof(BalanceTypeReader))] long amount, [Leftover] IGuildUser receiver)
         => Give(amount, receiver, null);
+
+    [Cmd]
+    [RequireContext(ContextType.Guild)]
+    public async Task Nom(
+        [OverrideTypeReader(typeof(BalanceTypeReader))]
+        long amount)
+    {
+        if (amount <= 0)
+            return;
+
+        var removed = await _cs.RemoveAsync(ctx.User.Id, amount, new TxData("nom", "eaten"));
+        if (!removed)
+        {
+            await Response().Error(strs.not_enough(CurrencySign)).SendAsync();
+            return;
+        }
+
+        await _service.RecordNomAsync(ctx.User.Id, ctx.User.Username, amount);
+
+        await Response()
+            .Confirm(strs.user_nommed(Format.Bold(ctx.User.ToString()), N(amount)))
+            .SendAsync();
+    }
+
+    [Cmd]
+    [RequireContext(ContextType.Guild)]
+    public async Task NomLb(int page = 1)
+    {
+        if (--page < 0)
+            return;
+
+        var richest = await _service.GetNomLeaderboardAsync(ctx.Client.CurrentUser.Id, page);
+
+        if (richest.Count == 0)
+        {
+            await Response().Error(strs.nomlb_none).SendAsync();
+            return;
+        }
+
+        var embed = CreateEmbed()
+            .WithOkColor()
+            .WithTitle($"{CurrencySign} {GetText(strs.leaderboard_nom)}");
+
+        var i = page * 9;
+        var desc = string.Join(
+            "\n",
+            richest.Select(x => $"`#{++i}` **{x.Username ?? x.UserId.ToString()}** - {N(x.EatenAmount)}")
+        );
+        embed.WithDescription(desc);
+
+        await Response().Embed(embed).SendAsync();
+    }
 
     [Cmd]
     [RequireContext(ContextType.Guild)]

@@ -19,7 +19,7 @@ defaultLocale: en-US
 # Allowed values: Simple, Normal, None
 consoleOutputType: Normal
 # Whether the bot will check for new releases every hour
-checkForUpdates: true
+checkForUpdates: false
 # List of owner IDs who have opted out of receiving forwarded DMs.
 # By default, all owners receive forwarded DMs. Use .fw command to opt out.
 forwardOptOutOwnerIds: []

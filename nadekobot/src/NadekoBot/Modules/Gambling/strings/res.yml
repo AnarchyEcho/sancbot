@@ -9,10 +9,12 @@ curtr_gift: Gift from {0} [{1}]
 curtr_take: Taken by bot owner {0} [{1}]
 gifted: '{2} has gifted {0} to {1}'
 has: '{0} has {1}'
+leaderboard_nom: Nom Leaderboard
 mass_award: Awarded {0} to {1} users from {2} role.
 mass_take: Taken {0} from {1} users in {2} role.
 max_bet_limit: You can't bet more than {0}
 min_bet_limit: You can't bet less than {0}
+nomlb_none: Nobody has nommed any currency yet.
 raffled_user: Raffled user
 rakeback_available: You have {0} rakeback available. Click the button to claim.
 rakeback_claimed: You've claimed {0} as rakeback!
@@ -34,6 +36,7 @@ timely_set_none: Users will not be able to work.
 timely_time: It's time to work!
 transaction: Currency Transaction
 transactions: Transactions of user {0}
+user_nommed: '{0} nommed {1}. Yum!'
 vote_suggest: Voting for the server will get you {0}!
 winlb: Biggest Wins Leaderboard
 won: Won

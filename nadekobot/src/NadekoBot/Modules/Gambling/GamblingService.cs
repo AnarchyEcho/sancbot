@@ -202,6 +202,43 @@ public class GamblingService : INService, IReadyExecutor
                       && x.Type == ReminderType.Timely);
     }
 
+    /// <summary>
+    /// Records an amount of currency a user has "nommed" (eaten), tracked separately
+    /// from their wallet balance for the .nomlb leaderboard. Reuses the existing
+    /// EatenCurrency table carried over from the old bot.
+    /// </summary>
+    public async Task RecordNomAsync(ulong userId, string username, long amount)
+    {
+        await using var uow = _db.GetDbContext();
+        await uow.GetTable<EatenCurrency>()
+            .InsertOrUpdateAsync(() => new()
+                {
+                    UserId = userId,
+                    Username = username,
+                    EatenAmount = amount,
+                },
+                old => new()
+                {
+                    Username = username,
+                    EatenAmount = old.EatenAmount + amount,
+                },
+                () => new()
+                {
+                    UserId = userId,
+                });
+    }
+
+    public async Task<List<EatenCurrency>> GetNomLeaderboardAsync(ulong botId, int page, int perPage = 9)
+    {
+        await using var uow = _db.GetDbContext();
+        return await uow.GetTable<EatenCurrency>()
+            .Where(x => x.EatenAmount > 0 && x.UserId != botId)
+            .OrderByDescending(x => x.EatenAmount)
+            .Skip(page * perPage)
+            .Take(perPage)
+            .ToListAsyncLinqToDB();
+    }
+
     public async Task RemoveAllTimelyClaimsAsync()
         => await _cache.RemoveAsync(_timelyKey);
 
@@ -276,6 +313,7 @@ public class GamblingService : INService, IReadyExecutor
             msg += $"❌ *+0 bonus for completing weekly quests!*\n";
         }
 
+        msg += $"\n**{N(totalAmount)}** total reward";
 
         return (totalAmount, msg);
     }

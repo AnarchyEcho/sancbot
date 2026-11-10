@@ -462,7 +462,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "MuteMembers, ManageRoles Server Permission"
+        "ManageRoles Server Permission\nMuteMembers Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -477,7 +477,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "MuteMembers, ManageRoles Server Permission"
+        "ManageRoles Server Permission\nMuteMembers Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -496,7 +496,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "ManageRoles Server Permission"
+        "ManageRoles Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -511,7 +511,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "ManageRoles Server Permission"
+        "ManageRoles Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -530,7 +530,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "MuteMembers Server Permission"
+        "MuteMembers Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -545,7 +545,7 @@
       "Module": "Administration",
       "Options": null,
       "Requirements": [
-        "MuteMembers Server Permission"
+        "MuteMembers Server Permission\nModerateMembers Server Permission"
       ]
     },
     {
@@ -2582,6 +2582,34 @@
     },
     {
       "Aliases": [
+        ".nom"
+      ],
+      "Description": "Feeds one or more users to improve their food stat. If no valid user is found, just shows a nom GIF.",
+      "Usage": [
+        ".nom @user",
+        ".nom @user1 @user2 @user3",
+        ".nom cutie"
+      ],
+      "Submodule": "Gambling",
+      "Module": "Gambling",
+      "Options": null,
+      "Requirements": []
+    },
+    {
+      "Aliases": [
+        ".nomlb"
+      ],
+      "Description": "?",
+      "Usage": [
+        ".nomlb"
+      ],
+      "Submodule": "Gambling",
+      "Module": "Gambling",
+      "Options": null,
+      "Requirements": []
+    },
+    {
+      "Aliases": [
         ".award"
       ],
       "Description": "Awards someone a certain amount of currency. You can specify the reason after the Username. You can also specify a role name to award currency to all users in a role.",
@@ -3204,6 +3232,20 @@
     },
     {
       "Aliases": [
+        ".shopsell",
+        ".sell"
+      ],
+      "Description": "Sells back a role you purchased from the shop at the given index, refunding 75% of the item's current price and removing the role from you.",
+      "Usage": [
+        ".shopsell 2"
+      ],
+      "Submodule": "ShopCommands",
+      "Module": "Gambling",
+      "Options": null,
+      "Requirements": []
+    },
+    {
+      "Aliases": [
         ".shopadd"
       ],
       "Description": "Adds an item to the shop.\nFirst you begin by specifying the type of the item you wish to add.\nAvailable types are role, list and command.\nIf the item is a role, specify a role id or a role name.\nIn case you're selling a command, and you need user's name, id etc, you can use the following placeholders:\n-     `%you%` - Buyer mention\n-     `%you.username%` - Buyer's username\n-     `%you.name%` - Buyer's global name\n-     `%you.nick%` - Buyer's display name\n90% of currency from each purchase will be received by the user who added the item to the shop. This is configurable by the bot owner",
@@ -3273,6 +3315,23 @@
       "Description": "Change the name of a shop entry at the specified index. Only works for non-role items",
       "Usage": [
         ".shopchangename 3 Cool stuff"
+      ],
+      "Submodule": "ShopCommands",
+      "Module": "Gambling",
+      "Options": null,
+      "Requirements": [
+        "Administrator Server Permission"
+      ]
+    },
+    {
+      "Aliases": [
+        ".shopchangedescription",
+        ".shopdesc"
+      ],
+      "Description": "Change the description of a shop entry at the specified index. This replaces the default \"You will get X role.\" text shown in the shop listing. Run without a description to clear it and go back to the default text.",
+      "Usage": [
+        ".shopchangedescription 1 Gives you a cool blue color and an extra heart!",
+        ".shopchangedescription 1"
       ],
       "Submodule": "ShopCommands",
       "Module": "Gambling",
@@ -3411,6 +3470,20 @@
       "Description": "Attempt to catch a fish.\nDifferent fish live in different places, at different times of day and in different weather.",
       "Usage": [
         ".fish"
+      ],
+      "Submodule": "FishingCommands",
+      "Module": "Games",
+      "Options": null,
+      "Requirements": []
+    },
+    {
+      "Aliases": [
+        ".fishhelp",
+        ".fihelp"
+      ],
+      "Description": "Join an active co-op whale event to help bring it in.\nTwo other anglers are needed within 60 seconds or the whale gets away.",
+      "Usage": [
+        ".fishhelp"
       ],
       "Submodule": "FishingCommands",
       "Module": "Games",
@@ -3977,9 +4050,7 @@
       "Submodule": "Patronage",
       "Module": "Help",
       "Options": null,
-      "Requirements": [
-        "Only Public Bot"
-      ]
+      "Requirements": []
     },
     {
       "Aliases": [
@@ -3994,8 +4065,7 @@
       "Module": "Help",
       "Options": null,
       "Requirements": [
-        "Bot Owner Only",
-        "Only Public Bot"
+        "Bot Owner Only"
       ]
     },
     {
@@ -4011,8 +4081,7 @@
       "Module": "Help",
       "Options": null,
       "Requirements": [
-        "Bot Owner Only",
-        "Only Public Bot"
+        "Bot Owner Only"
       ]
     }
   ],
@@ -9616,6 +9685,21 @@
       "Module": "Xp",
       "Options": null,
       "Requirements": []
+    },
+    {
+      "Aliases": [
+        ".xpzerorole"
+      ],
+      "Description": "?",
+      "Usage": [
+        ".xpzerorole"
+      ],
+      "Submodule": "XpRewards",
+      "Module": "Xp",
+      "Options": null,
+      "Requirements": [
+        "Administrator Server Permission"
+      ]
     },
     {
       "Aliases": [
