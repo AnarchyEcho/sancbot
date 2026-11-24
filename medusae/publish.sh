@@ -1,6 +1,8 @@
 #!/bin/bash
 cd ../nadekopi || exit
-export "$(xargs <.env.local)"
+set -a # automatically export all variables
+source .env.local
+set +a
 cd ./medusae || exit
 
 if [ "$1" = "" ]; then

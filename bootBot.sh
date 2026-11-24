@@ -1,5 +1,7 @@
 #!/bin/bash
-export "$(xargs <.env.local)"
+set -a # automatically export all variables
+source .env.local
+set +a
 
 #Prep medusae
 for dir in /home/"$USERNAME"/Desktop/nadekopi/medusae/*/; do
